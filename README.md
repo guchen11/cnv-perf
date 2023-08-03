@@ -9,7 +9,7 @@ poetry add openshift
 
 copy and run from any system :
 Example:
-rsync -a -Pav -e "ssh -l kni" /home/guchen/cnv-perf e26-h37-740xd.alias.bos.scalelab.redhat.com:/home/kni/guchen/
+rsync -a -Pav -e "ssh -l kni" /home/guchen/cnv-perf {hostname}:/home/kni/guchen/
 
 **To get all modules in the program:**
 
