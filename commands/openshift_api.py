@@ -1,0 +1,176 @@
+import json
+import warnings
+import click
+from kubernetes import client, config
+from kubernetes.dynamic.exceptions import ResourceNotFoundError
+from openshift.dynamic import DynamicClient
+from utilities import files_access
+import time
+
+
+@click.group()
+def openshift_api_module():
+    pass
+
+
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'], max_content_width=120)
+
+command_help: str = """
+    Create namespaces with start and end index.
+
+    Example: create-namespace --start 1 --end 5
+    This will create namespaces from 'test-namespace-1' to 'test-namespace-5'.
+    """
+
+
+@openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@click.option('--start', type=int, help='Start index for namespace creation')
+@click.option('--end', type=int, help='End index for namespace creation')
+def create_namespace(start, end):
+    k8s_client = config.new_client_from_config()
+    dyn_client = DynamicClient(k8s_client)
+    v1_services = dyn_client.resources.get(api_version='v1', kind='Namespace')
+
+    template = files_access.load_template("utilities/manifests/namespace.json")
+
+    for i in range(start, end + 1):
+        namespace_name = f'test-namespace-{i}'
+        modified_template = files_access.modify_template(template, namespace_name)
+
+        v1_services.create(body=modified_template)
+        print(f"Namespace {namespace_name} was created")
+
+
+command_help: str = """
+    Create VMs with start and end index.
+    
+    Example: create-vm-cirros --prefix cirros-vm- --namespace default --start 1 --end 5 --sleep 2 
+    This will create VMs from 'cirros-vm-1' to 'cirros-vm-5' in the 'default' namespace with 2 secounds sleep.
+    """
+
+
+@openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@click.option('--prefix', help='Prefix for VM names')
+@click.option('--namespace', help='Namespace for VM creation')
+@click.option('--start', type=int, help='Start index for VM creation')
+@click.option('--end', type=int, help='End index for VM creation')
+@click.option('--sleep', type=int, help='sleep between VMSs')
+def create_vm_cirros(prefix, namespace, start, end, sleep):
+    k8s_client = config.new_client_from_config()
+    dyn_client = DynamicClient(k8s_client)
+    v1_services = dyn_client.resources.get(api_version='kubevirt.io/v1', kind='VirtualMachine')
+
+    template = files_access.load_template("utilities/manifests/cirros.json")
+
+    for i in range(start, end + 1):
+        VM_NAME = f'{prefix}{i}'
+        template_str = json.dumps(template)
+        modified_template = template_str.replace("{{VM_NAME}}", VM_NAME)
+        modified_template = json.loads(modified_template)
+
+        v1_services.create(body=modified_template, namespace=namespace)
+        print(f"VM {VM_NAME} was created")
+        time.sleep(sleep)
+
+
+command_help = """
+    Delete namespaces with start and end index.
+
+    Example: delete-namespace --start 1 --end 5
+    This will delete namespaces from 'test-namespace-1' to 'test-namespace-5'.
+    """
+
+
+@openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@click.option('--start', type=int, help='Start index for namespace deletion')
+@click.option('--end', type=int, help='End index for namespace deletion')
+def delete_namespace(start, end):
+    k8s_client = config.new_client_from_config()
+    dyn_client = DynamicClient(k8s_client)
+    v1_services = dyn_client.resources.get(api_version='v1', kind='Namespace')
+
+    for i in range(start, end + 1):
+        namespace_name = f'test-namespace-{i}'
+        v1_services.delete(name=namespace_name)
+        print(f"Namespace {namespace_name} was deleted")
+
+
+command_help = """
+    Delete vm with start and end index.
+
+    Example: delete-vm --prefix test-vm- --namespace default --start 1 --end 5
+    This will delete vm from 'test-vm-1' to 'test-vm-5'.
+    """
+
+
+@openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@click.option('--prefix', help='Prefix for VM names')
+@click.option('--namespace', help='Namespace for VM deletion')
+@click.option('--start', type=int, help='Start index for VM deletion')
+@click.option('--end', type=int, help='End index for VM deletion')
+def delete_vm(prefix, namespace, start, end):
+    k8s_client = config.new_client_from_config()
+    dyn_client = DynamicClient(k8s_client)
+    v1_services = dyn_client.resources.get(api_version='kubevirt.io/v1', kind='VirtualMachine')
+
+    for i in range(start, end + 1):
+        vm_name = f'{prefix}{i}'
+        try:
+            v1_services.delete(name=vm_name, namespace=namespace)
+            print(f"VM {vm_name} in Namespace {namespace} was deleted")
+        except ResourceNotFoundError:
+            warning_message = f"Virtual machine '{vm_name}' not found."
+            warnings.warn(warning_message, category=UserWarning)
+
+command_help: str = """
+    Create pvc with start and end index.
+
+    Example: create_pvc --prefix pvc-test- --namespace default --start 1 --end 2 --sleep 2 
+    This will create pvc from 'pvc-test-1' to 'pvc-test-2'.
+    """
+
+@openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@click.option('--prefix', help='Prefix for PVC names')
+@click.option('--namespace', help='Namespace for PVC creation')
+@click.option('--start', type=int, help='Start index for PVC creation')
+@click.option('--end', type=int, help='End index for PVC creation')
+@click.option('--sleep', type=int, help='sleep between PVCs')
+def create_pvc(prefix, namespace, start, end, sleep):
+    # Load OpenShift configuration from default kubeconfig file
+    config.load_kube_config()
+
+    # Initialize DynamicClient for OpenShift API
+    dyn_client = DynamicClient(client.ApiClient())
+
+    # Initialize Kubernetes API client
+    api_instance = client.CoreV1Api()
+
+    for i in range(start, end + 1):
+        pvc_name = f'{prefix}{i}'
+    # Set namespace, VM name, PVC details
+        storage_class_name = "ocs-storagecluster-ceph-rbd"
+        access_modes = "ReadWriteMany"
+        storage_size = "1Gi"
+
+    # Create the PVC
+        body = client.V1PersistentVolumeClaim(
+            api_version="v1",
+            kind="PersistentVolumeClaim",
+            metadata=client.V1ObjectMeta(name=pvc_name),
+            spec=client.V1PersistentVolumeClaimSpec(
+                access_modes=[access_modes],
+                resources=client.V1ResourceRequirements(
+                    requests={"storage": storage_size}
+                ),
+                storage_class_name=storage_class_name,
+                volume_mode="Block"  # Specify the volume mode as "Block"
+            )
+        )
+
+        api_response = api_instance.create_namespaced_persistent_volume_claim(
+            namespace=namespace,
+            body=body
+        )
+        print(f"PVC {pvc_name} created. Status={api_response.status}")
+        time.sleep(sleep)
+

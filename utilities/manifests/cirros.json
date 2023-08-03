@@ -1,0 +1,80 @@
+{
+  "apiVersion": "kubevirt.io/v1",
+  "kind": "VirtualMachine",
+  "metadata": {
+    "creationTimestamp": null,
+    "labels": {
+      "kubevirt.io/vm": "{{VM_NAME}}"
+    },
+    "name": "{{VM_NAME}}"
+  },
+  "spec": {
+    "dataVolumeTemplates": [
+      {
+        "metadata": {
+          "creationTimestamp": null,
+          "name": "{{VM_NAME}}"
+        },
+        "spec": {
+          "pvc": {
+            "accessModes": [
+              "ReadWriteMany"
+            ],
+            "resources": {
+              "requests": {
+                "storage": "100M"
+              }
+            },
+            "storageClassName": "ocs-storagecluster-ceph-rbd",
+            "volumeMode": "Block"
+          },
+          "source": {
+            "http": {
+              "url": "https://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img"
+            }
+          }
+        }
+      }
+    ],
+    "running": false,
+    "template": {
+      "metadata": {
+        "labels": {
+          "kubevirt.io/vm": "{{VM_NAME}}"
+        }
+      },
+      "spec": {
+        "domain": {
+          "devices": {
+            "disks": [
+              {
+                "disk": {
+                  "bus": "virtio"
+                },
+                "name": "{{VM_NAME}}"
+              }
+            ]
+          },
+          "machine": {
+            "type": ""
+          },
+          "resources": {
+            "requests": {
+              "memory": "64M"
+            }
+          }
+        },
+        "evictionStrategy": "LiveMigrate",
+        "terminationGracePeriodSeconds": 0,
+        "volumes": [
+          {
+            "dataVolume": {
+              "name": "{{VM_NAME}}"
+            },
+            "name": "{{VM_NAME}}"
+          }
+        ]
+      }
+    }
+  }
+}

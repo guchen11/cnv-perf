@@ -1,0 +1,19 @@
+{
+  "kind": "Namespace",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "{{NAMESPACE_NAME}}",
+    "labels": {
+      "created-by-cnv-tests": "Yes",
+      "kubernetes.io/metadata.name": "{{NAMESPACE_NAME}}"
+    }
+  },
+  "spec": {
+    "finalizers": [
+      "kubernetes"
+    ]
+  },
+  "status": {
+    "phase": "Active"
+  }
+}
