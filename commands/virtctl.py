@@ -86,10 +86,10 @@ def migrate_node(node, sleep):
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'], max_content_width=120)
 command_help: str = """
-    Attache pvc in the given range to VM.
+    Attach pvc in the given range to VM.
 
-    Example: attache-pcv-to-vm --vm_name rhel9-server --prefix pvc-test- --start 1 --end 2 --sleep 2 
-    This will attache PVCs from 'pvc-test-1' to 'pvc-test-2'.
+    Example: attach-pcv-to-vm --vm_name rhel9-server --prefix pvc-test- --start 1 --end 2 --sleep 2 
+    This will attach PVCs from 'pvc-test-1' to 'pvc-test-2'.
     """
 
 
@@ -98,8 +98,8 @@ command_help: str = """
 @click.option('--prefix', help='Prefix for PVC names')
 @click.option('--start', type=int, help='Start index for PVC')
 @click.option('--end', type=int, help='End index for PVC')
-@click.option('--sleep', type=int, help='sleep between PVC attache')
-def attache_pcv_to_vm(vm_name, prefix, start, end, sleep):
+@click.option('--sleep', type=int, help='sleep between PVC attach')
+def attach_pcv_to_vm(vm_name, prefix, start, end, sleep):
     for i in range(start, end +1):
         pvc_name = f'{prefix}{i}'
         run_virtctl(['addvolume', vm_name,'--volume-name='+pvc_name, '--persist'])
@@ -109,10 +109,10 @@ def attache_pcv_to_vm(vm_name, prefix, start, end, sleep):
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'], max_content_width=120)
 command_help: str = """
-    Detache pvc in the given range to VM.
+    Detach pvc in the given range to VM.
 
-    Example: detache-pcv-to-vm --vm_name rhel9-server --prefix pvc-test- --start 1 --end 2 --sleep 2 
-    This will detache PVCs from 'pvc-test-1' to 'pvc-test-2'.
+    Example: detach-pcv-to-vm --vm_name rhel9-server --prefix pvc-test- --start 1 --end 2 --sleep 2 
+    This will detach PVCs from 'pvc-test-1' to 'pvc-test-2'.
     """
 
 
@@ -121,8 +121,8 @@ command_help: str = """
 @click.option('--prefix', help='Prefix for PVC names')
 @click.option('--start', type=int, help='Start index for PVC')
 @click.option('--end', type=int, help='End index for PVC')
-@click.option('--sleep', type=int, help='sleep between PVC attache')
-def detache_pcv_to_vm(vm_name, prefix, start, end, sleep):
+@click.option('--sleep', type=int, help='sleep between PVC attach')
+def detach_pcv_to_vm(vm_name, prefix, start, end, sleep):
     for i in range(start, end +1):
         pvc_name = f'{prefix}{i}'
         run_virtctl(['removevolume', vm_name,'--volume-name='+pvc_name, '--persist'])
