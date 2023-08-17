@@ -1,0 +1,35 @@
+{
+  "apiVersion": "nmstate.io/v1",
+  "kind": "NodeNetworkConfigurationPolicy",
+  "metadata": {
+    "name": "br-nncp-scale-{{index}}"
+  },
+  "spec": {
+    "desiredState": {
+      "interfaces": [
+        {
+          "name": "br-scale-{{index}}",
+          "type": "linux-bridge",
+          "state": "up",
+          "bridge": {
+            "options": {
+              "stp": {
+                "enabled": false
+              }
+            }
+          },
+          "ipv4": {
+            "enabled": false,
+            "dhcp": false
+          },
+          "ipv6": {
+            "enabled": false
+          }
+        }
+      ]
+    },
+    "nodeSelector": {
+      "node-role.kubernetes.io/worker": ""
+    }
+  }
+}

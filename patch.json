@@ -1,0 +1,34 @@
+oc patch vm rhel9-server -n default --type='json' -p='[{
+    "op": "add",
+    "path": "/spec/template/spec/volumes/-",
+    "value": {
+      "name": "pvc-test-1-volume",
+      "persistentVolumeClaim": {"claimName": "pvc-test-1"}
+    }
+  }
+]'
+
+oc patch vm rhel9-server -n default --type='json' -p='[{
+    "op": "add",
+    "path": "/spec/template/spec/domain/devices/disks/-",
+    "value": {
+        "name": "pvc-test-1-volume",
+	"disk": { "bus": "virtio"}
+    }
+  }
+]'
+
+oc patch vm rhel9-server -n default --type='json' -p='[{
+    "op": "add",
+    "path": "/spec/template/spec/domain/devices/disks/-",
+    "value": [
+      {
+        "name": "disk-guy",
+        "disk": { "bus": "virtio"}
+      }
+    ]
+  }
+]'
+
+	
+	volumeSnapshotStatuses

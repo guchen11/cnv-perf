@@ -14,7 +14,7 @@ def execute_local_linux_command_base(command):
         # Command executed successfully
         output = result.stdout
         print(output)
-        return output
+        return output.strip()
     else:
         # Command encountered an error
         error_message = result.stderr

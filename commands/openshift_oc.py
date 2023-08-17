@@ -1,5 +1,8 @@
+import json
+import time
 import click
 
+from utilities import files_access
 from utilities.bash import execute_local_linux_command_base
 
 
@@ -87,3 +90,102 @@ def oc_create_vm_golden_image_range(name, template, data_source, cloud_user_pass
     for i in range(start, end + 1):
         VM_NAME = f"{name}-{i}"
         oc_create_vm_golden_image_base(VM_NAME, template, data_source, cloud_user_password, namespace)
+
+
+command_help: str = """
+    Attach or detach pvc in the given range to VM.
+
+    Example: attach-detach-pcv-vm --vm_name rhel9-server --namespace default --op add --prefix pvc-test- --start 1 --end 2 --sleep 0 
+    This will attach PVCs from 'pvc-test-1' to 'pvc-test-2'.
+    """
+
+
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@click.option('--vm_name', help='VM names')
+@click.option('--namespace', help='Namespace for VM creation')
+@click.option('--op', help='operation on the vm')
+@click.option('--prefix', help='Prefix for PVC names')
+@click.option('--start', type=int, help='Start index for PVC')
+@click.option('--end', type=int, help='End index for PVC')
+@click.option('--sleep', type=int, help='sleep between PVC attach')
+def attach_detach_pcv_vm(vm_name, namespace, op, prefix, start, end, sleep):
+    for i in range(start, end + 1):
+        template = files_access.load_template("utilities/manifests/add_pvc_to_vm.json")
+        template_str = json.dumps(template)
+        modified_template = template_str.replace("{{PVC_NAME}}", f'{prefix}{i}')
+        modified_template = json.loads(modified_template)
+        template_str = json.dumps(modified_template)
+        modified_template = template_str.replace("{{OP}}", f'{op}')
+        modified_template = json.loads(modified_template)
+        command = f"oc patch vm {vm_name} -n {namespace} --type='json' -p='{modified_template}'"
+        execute_local_linux_command_base(command)
+        time.sleep(sleep)
+
+
+command_help: str = """
+    Set pvc interface in the given range.
+
+    Example: set-pvc-interface --vm_name rhel9-server --namespace default --interface virtio --prefix pvc-test- --start 1 --end 2 --sleep 0 
+    This will attach PVCs from 'pvc-test-1' to 'pvc-test-2'.
+    """
+
+
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@click.option('--vm_name', help='VM names')
+@click.option('--namespace', help='Namespace for VM')
+@click.option('--interface', help='Interface of the pvc')
+@click.option('--prefix', help='Prefix for PVC names')
+@click.option('--start', type=int, help='Start index for PVC')
+@click.option('--end', type=int, help='End index for PVC')
+@click.option('--sleep', type=int, help='sleep between PVC attach')
+def set_pvc_interface(vm_name, namespace, interface, prefix, start, end, sleep):
+    for i in range(start, end + 1):
+        template = files_access.load_template("utilities/manifests/set_pvc_interface.json")
+        template_str = json.dumps(template)
+        modified_template = template_str.replace("{{PVC_NAME}}", f'{prefix}{i}')
+        modified_template = json.loads(modified_template)
+        template_str = json.dumps(modified_template)
+        modified_template = template_str.replace("{{INTERFACE}}", f'{interface}')
+        modified_template = json.loads(modified_template)
+        command = f"oc patch vm {vm_name} -n {namespace} --type='json' -p='{modified_template}'"
+        execute_local_linux_command_base(command)
+        time.sleep(sleep)
+
+
+command_help: str = """
+    Create or delete basic NNCPs on each worker node 
+
+    Example: create-delete-nncp --op create --start 1 --end 1 --sleep 0 
+    This will create NodeNetworkConfigurationPolicy from 'br-scale-1' to 'br-scale-2'.
+    """
+
+
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@click.option('--op', help='operation for NNCPs')
+@click.option('--start', type=int, help='Start index for NNCPs')
+@click.option('--end', type=int, help='End index for NNCPs')
+@click.option('--sleep', type=int, help='sleep between NNCPs attach')
+def create_delete_nncp(op, start, end, sleep):
+    for i in range(start, end + 1):
+        template = files_access.load_template("utilities/manifests/NodeNetworkConfigurationPolicy.json")
+        template_str = json.dumps(template)
+        modified_template = template_str.replace("{{index}}", f'{i}')
+        command = f"echo '{modified_template}' | oc '{op}' -f -"
+        execute_local_linux_command_base(command)
+        time.sleep(sleep)
+    SuccessfullyConfigured=0
+    if op == 'create':
+        while int(SuccessfullyConfigured) != end :
+            command = "oc get nncp | grep br-nncp-scale | grep SuccessfullyConfigured | wc -l"
+            SuccessfullyConfigured = execute_local_linux_command_base(command)
+            print(f"SuccessfullyConfigured: '{SuccessfullyConfigured}', end: '{end}'")
+            time.sleep(2)
+    else:
+        SuccessfullyConfigured = 1
+        while int(SuccessfullyConfigured) != 0 :
+            command = "oc get nncp | grep br-nncp-scale | grep SuccessfullyConfigured | wc -l"
+            SuccessfullyConfigured = execute_local_linux_command_base(command)
+            print(f"SuccessfullyConfigured: '{SuccessfullyConfigured}', end: 0")
+            time.sleep(2)
+
+

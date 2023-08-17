@@ -10,12 +10,13 @@ def run_virtctl(args):
     if result.returncode == 0:
         output = result.stdout
         print(output)
-        return result.stdout.strip()
+        return result.returncode
     else:
         # Handle error case
         output = result.stderr
-        print(output)
-        return result.stderr.strip()
+        print("Error: " + output)
+
+        return result.returncode
 
 
 @click.group()
@@ -86,9 +87,9 @@ def migrate_node(node, sleep):
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'], max_content_width=120)
 command_help: str = """
-    Attach pvc in the given range to VM.
+    Attach hotplug pvc in the given range to VM.
 
-    Example: attach-pcv-to-vm --vm_name rhel9-server --prefix pvc-test- --start 1 --end 2 --sleep 2 
+    Example: hotplug-attach-pcv-to-vm --vm_name rhel9-server --prefix pvc-test- --start 1 --end 2 --sleep 2 
     This will attach PVCs from 'pvc-test-1' to 'pvc-test-2'.
     """
 
@@ -99,19 +100,23 @@ command_help: str = """
 @click.option('--start', type=int, help='Start index for PVC')
 @click.option('--end', type=int, help='End index for PVC')
 @click.option('--sleep', type=int, help='sleep between PVC attach')
-def attach_pcv_to_vm(vm_name, prefix, start, end, sleep):
+def hotplug_attach_pcv_to_vm(vm_name, prefix, start, end, sleep):
+    error_result = 0
     for i in range(start, end +1):
         pvc_name = f'{prefix}{i}'
-        run_virtctl(['addvolume', vm_name,'--volume-name='+pvc_name, '--persist'])
+        return_code = run_virtctl(['addvolume', vm_name,'--volume-name='+pvc_name, '--persist'])
+        if return_code != 0:
+            error_result = error_result+1
         time.sleep(sleep)
+    print(f'Out of {i-1} actions {error_result} have failed')
 
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'], max_content_width=120)
 command_help: str = """
-    Detach pvc in the given range to VM.
+    Detach hotplug pvc in the given range to VM.
 
-    Example: detach-pcv-to-vm --vm_name rhel9-server --prefix pvc-test- --start 1 --end 2 --sleep 2 
+    Example: hotplug-detach-pcv-to-vm --vm_name rhel9-server --prefix pvc-test- --start 1 --end 2 --sleep 2 
     This will detach PVCs from 'pvc-test-1' to 'pvc-test-2'.
     """
 
@@ -122,9 +127,13 @@ command_help: str = """
 @click.option('--start', type=int, help='Start index for PVC')
 @click.option('--end', type=int, help='End index for PVC')
 @click.option('--sleep', type=int, help='sleep between PVC attach')
-def detach_pcv_to_vm(vm_name, prefix, start, end, sleep):
+def hotplug_detach_pcv_to_vm(vm_name, prefix, start, end, sleep):
+    error_result = 0
     for i in range(start, end +1):
         pvc_name = f'{prefix}{i}'
-        run_virtctl(['removevolume', vm_name,'--volume-name='+pvc_name, '--persist'])
+        return_code = run_virtctl(['removevolume', vm_name,'--volume-name='+pvc_name, '--persist'])
+        if return_code != 0:
+            error_result = error_result + 1
         time.sleep(sleep)
+    print(f'Out of {i-1} actions {error_result} have failed')
 

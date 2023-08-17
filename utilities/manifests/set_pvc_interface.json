@@ -1,0 +1,8 @@
+[{
+    "op": "add",
+    "path": "/spec/template/spec/domain/devices/disks/-",
+    "value": {
+      "name": "{{PVC_NAME}}",
+      "disk": { "bus": "{{INTERFACE}}"}
+    }
+}]
