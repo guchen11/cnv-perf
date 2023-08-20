@@ -64,3 +64,50 @@ Options:
   --start INTEGER             Start index for VM creation
   --end INTEGER               End index for VM creation
   -h, --help                  Show this message and exit.
+
+**Performance Grafana and PromDB server :**
+
+All test’s PromDB data is now stored at a designated server and can be viewed at the below portals, by default the last test data is online.
+Grafana dashboard’s : http://grafana-scale-test.apps.cnv2.engineering.redhat.com/, user/password view/view 
+Prometheus DB : http://promdb-scale-test.apps.cnv2.engineering.redhat.com/graph
+
+Lab of the server :
+https://console-openshift-console.apps.cnv2.engineering.redhat.com/
+VM access : ssh fedora@10.46.41.94 -p 22000
+
+Procedure to get system matrix :
+
+Before test create new DB -
+oc delete po prometheus-k8s-0 -n openshift-monitoring
+oc delete po prometheus-k8s-1 -n openshift-monitoring
+Check promdb size-
+oc exec -n openshift-monitoring prometheus-k8s-0 -- du -sh /prometheus
+oc exec -n openshift-monitoring prometheus-k8s-1 -- du -sh /prometheus
+
+After test dump db and tar it -
+mkdir -p {promTestName}
+oc cp -n  openshift-monitoring prometheus-k8s-0:/prometheus -c prometheus  {promTestName}
+tar -czvf {promTestName}.tar.gz {promTestName}
+rm -rf {promTestName}
+
+send db -
+scp -P 22000 {promTestName}.tar.gz fedora@10.46.41.95:/home/fedora
+tar -xvzf {promTestName}.tar.gz
+
+test_name=$1
+
+Upload db on 10.46.41.95 -
+sudo systemctl stop prometheus
+sudo rm -rf /var/lib/prometheus/*
+sudo cp {promTestName}.tar.gz tmp_{promTestName}.tar.gz
+sudo tar -xvf tmp_{promTestName}.tar.gz
+sudo cp -R {promTestName}/* /var/lib/prometheus/
+sudo chown -R prometheus:prometheus /var/lib/prometheus/*
+sudo rm -rf tmp_{promTestName}.tar.gz
+sudo rm -rf {promTestName}
+sudo systemctl start prometheus
+
+
+
+
+
