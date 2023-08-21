@@ -92,9 +92,7 @@ rm -rf {promTestName}
 
 send db -
 scp -P 22000 {promTestName}.tar.gz fedora@10.46.41.95:/home/fedora
-tar -xvzf {promTestName}.tar.gz
 
-test_name=$1
 
 Upload db on 10.46.41.95 -
 sudo systemctl stop prometheus
