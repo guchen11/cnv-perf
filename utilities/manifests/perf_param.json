@@ -1,0 +1,8 @@
+[{
+    "op": "{{OP}}",
+    "path": "/spec/template/spec/volumes/-",
+    "value": {
+      "name": "{{PVC_NAME}}",
+      "persistentVolumeClaim": {"claimName": "{{PVC_NAME}}"}
+    }
+}]
