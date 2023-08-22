@@ -1,6 +1,7 @@
 import click
 import paramiko
 from utilities.bash import execute_local_linux_command_base
+from utilities import bash
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'], max_content_width=120)
 
@@ -62,3 +63,39 @@ def execute_ssh_command(hostname, username, command):
 
     # Close the SSH connection
     client.close()
+
+
+command_help: str = """
+    scp PromDB to Grafana
+
+    Args:
+        test_name (str): The name to name the test.
+
+    Examples:
+        scp-promdb-to-grafana "scale_up_test_1"
+            send the promdb to grafana server.
+    """
+
+
+@cli_command_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@click.argument('test_name', type=click.STRING, required=True)
+def scp_promdb_to_grafana(test_name):
+    bash.scp_promdb_to_grafana(test_name)
+
+
+command_help: str = """
+    deploy test at Grafana
+
+    Args:
+        test_name (str): The name to name the test.
+
+    Examples:
+        deploy-test-at-grafana "scale_up_test_1"
+            deploy promdb to grafana server.
+    """
+
+
+@cli_command_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@click.argument('test_name', type=click.STRING, required=True)
+def deploy_test_at_grafana(test_name):
+    bash.deploy_test_at_grafana(test_name)

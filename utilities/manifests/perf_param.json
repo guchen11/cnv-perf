@@ -1,8 +1,5 @@
-[{
-    "op": "{{OP}}",
-    "path": "/spec/template/spec/volumes/-",
-    "value": {
-      "name": "{{PVC_NAME}}",
-      "persistentVolumeClaim": {"claimName": "{{PVC_NAME}}"}
-    }
-}]
+{
+    "performance_test": "False",
+    "test_constractor": "False",
+    "test_name": "currentTest"
+}

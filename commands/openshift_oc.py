@@ -1,8 +1,7 @@
 import json
 import time
 import click
-
-from utilities import files_access
+from utilities import files_access, oc
 from utilities.bash import execute_local_linux_command_base
 
 
@@ -189,3 +188,22 @@ def create_delete_nncp(op, start, end, sleep):
             time.sleep(2)
 
 
+command_help: str = """
+    Empty prometheus data base
+    """
+
+
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+def empty_prometheus():
+    oc.empty_prometheus()
+
+
+command_help: str = """
+    Dump prometheus data base
+    """
+
+
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@click.argument('test_name', type=click.STRING, required=True)
+def dump_prometheus(test_name):
+    oc.dump_prometheus(test_name)

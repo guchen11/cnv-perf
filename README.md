@@ -85,26 +85,37 @@ oc exec -n openshift-monitoring prometheus-k8s-0 -- du -sh /prometheus
 oc exec -n openshift-monitoring prometheus-k8s-1 -- du -sh /prometheus
 
 After test dump db and tar it -
-mkdir -p {promTestName}
-oc cp -n  openshift-monitoring prometheus-k8s-0:/prometheus -c prometheus  {promTestName}
-tar -czvf {promTestName}.tar.gz {promTestName}
-rm -rf {promTestName}
+mkdir -p {test_name}
+oc cp -n  openshift-monitoring prometheus-k8s-0:/prometheus -c prometheus  {test_name}
+tar -czvf {test_name}.tar.gz {test_name}
+rm -rf {test_name}
 
 send db -
-scp -P 22000 {promTestName}.tar.gz fedora@10.46.41.95:/home/fedora
+sshpass -p 100yard- scp -P 22000 {test_name}.tar.gz fedora@10.46.41.94:/home/fedora
 
-
-Upload db on 10.46.41.95 -
+Upload db on 10.46.41.94 -
 sudo systemctl stop prometheus
 sudo rm -rf /var/lib/prometheus/*
-sudo cp {promTestName}.tar.gz tmp_{promTestName}.tar.gz
-sudo tar -xvf tmp_{promTestName}.tar.gz
-sudo cp -R {promTestName}/* /var/lib/prometheus/
+sudo cp {test_name}.tar.gz tmp_{test_name}.tar.gz
+sudo tar -xvf tmp_{test_name}.tar.gz
+sudo cp -R {test_name}/* /var/lib/prometheus/
 sudo chown -R prometheus:prometheus /var/lib/prometheus/*
-sudo rm -rf tmp_{promTestName}.tar.gz
-sudo rm -rf {promTestName}
+sudo rm -rf tmp_{test_name}.tar.gz
+sudo rm -rf {test_name}
 sudo systemctl start prometheus
 
+Automation for procedure to get system matrix :
+full automation -
+poetry run python main.py test-constructor {test_name}
+poetry run python main.py {all commands will trigger full procedure}
+
+Single action automation -
+poetry run python main.py set-test-name {test_name}
+poetry run python main.py openshift-oc-module empty-prometheus
+after test is finished :
+poetry run python main.py openshift-oc-module dump-prometheus {test_name}
+poetry run python main.py cli-command-module scp-promdb-to-grafana {test_name}
+poetry run python main.py cli-command-module deploy-test-at-grafana {test_name}
 
 
 
