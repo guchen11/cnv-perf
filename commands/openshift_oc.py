@@ -172,16 +172,16 @@ def create_delete_nncp(op, start, end, sleep):
         command = f"echo '{modified_template}' | oc '{op}' -f -"
         execute_local_linux_command_base(command)
         time.sleep(sleep)
-    SuccessfullyConfigured=0
+    SuccessfullyConfigured = 0
     if op == 'create':
-        while int(SuccessfullyConfigured) != end :
+        while int(SuccessfullyConfigured) != end:
             command = "oc get nncp | grep br-nncp-scale | grep SuccessfullyConfigured | wc -l"
             SuccessfullyConfigured = execute_local_linux_command_base(command)
             print(f"SuccessfullyConfigured: '{SuccessfullyConfigured}', end: '{end}'")
             time.sleep(2)
     else:
         SuccessfullyConfigured = 1
-        while int(SuccessfullyConfigured) != 0 :
+        while int(SuccessfullyConfigured) != 0:
             command = "oc get nncp | grep br-nncp-scale | grep SuccessfullyConfigured | wc -l"
             SuccessfullyConfigured = execute_local_linux_command_base(command)
             print(f"SuccessfullyConfigured: '{SuccessfullyConfigured}', end: 0")
@@ -207,3 +207,33 @@ command_help: str = """
 @click.argument('test_name', type=click.STRING, required=True)
 def dump_prometheus(test_name):
     oc.dump_prometheus(test_name)
+
+
+command_help: str = """
+    Test maximum pods on a cluster.
+
+    Example: test-maximum-pod --replicas 2000
+    This will create 2000 pods.
+    """
+
+
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@click.option('--replicas', help='number of replicas')
+def test_maximum_pod(replicas):
+    template = files_access.load_template("utilities/manifests/maxPod.json")
+    template["spec"]["replicas"] = int(replicas)
+    template_str = json.dumps(template)
+    command = f"echo '{template_str}' | oc create -f -"
+    execute_local_linux_command_base(command)
+
+    availableReplicas = 0
+    command = "oc get deployment pod-scale-test-dep -o json | jq -r '.status.availableReplicas'"
+    while int(availableReplicas) != int(replicas):
+        time.sleep(1)
+        availableReplicas = execute_local_linux_command_base(command)
+        if availableReplicas == "null":
+            time.sleep(1)
+            availableReplicas = 0
+
+    command = f"echo '{template_str}' | oc delete -f -"
+    execute_local_linux_command_base(command)

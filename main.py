@@ -19,6 +19,10 @@ class Timer:
 
     def __exit__(self, type, value, traceback):
 
+        self.end = time.time()
+        elapsed_time = self.end - self.start
+        print(f"{self.description}: {elapsed_time}")
+        time.sleep(120)
         self.test_constractor = files_access.get_json_value("utilities/manifests/perf_param.json", "test_constractor")
         self.performance_test = files_access.get_json_value("utilities/manifests/perf_param.json", "performance_test")
         self.test_name = files_access.get_json_value("utilities/manifests/perf_param.json", "test_name")
@@ -36,9 +40,6 @@ class Timer:
                 files_access.update_json_value("utilities/manifests/perf_param.json", "performance_test", "False")
                 files_access.update_json_value("utilities/manifests/perf_param.json", "test_name", "currentTest")
             oc.execute_local_linux_command_base("cat utilities/manifests/perf_param.json")
-        self.end = time.time()
-        elapsed_time = self.end - self.start
-        print(f"{self.description}: {elapsed_time}")
 
 
 # Context settings for Click commands
@@ -84,7 +85,7 @@ command_help: str = """
     Performance test destructor
 
     Examples:
-        test-destructor "scale_up_
+        test-destructor "scale_up_test_1"
     """
 
 
