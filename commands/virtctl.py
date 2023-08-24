@@ -106,7 +106,10 @@ def hotplug_attach_pcv_to_vm(vm_name, prefix, start, end, sleep):
         pvc_name = f'{prefix}{i}'
         return_code = run_virtctl(['addvolume', vm_name,'--volume-name='+pvc_name, '--persist'])
         if return_code != 0:
-            error_result = error_result+1
+            error_result = error_result + 1
+        while return_code != 0:
+            time.sleep(2)
+            return_code = run_virtctl(['addvolume', vm_name, '--volume-name=' + pvc_name, '--persist'])
         time.sleep(sleep)
     print(f'Out of {i-1} actions {error_result} have failed')
 
@@ -134,6 +137,9 @@ def hotplug_detach_pcv_to_vm(vm_name, prefix, start, end, sleep):
         return_code = run_virtctl(['removevolume', vm_name,'--volume-name='+pvc_name, '--persist'])
         if return_code != 0:
             error_result = error_result + 1
+        while return_code != 0:
+            time.sleep(2)
+            return_code = run_virtctl(['removevolume', vm_name, '--volume-name=' + pvc_name, '--persist'])
         time.sleep(sleep)
     print(f'Out of {i-1} actions {error_result} have failed')
 
