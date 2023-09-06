@@ -68,7 +68,7 @@ Options:
 **Performance Grafana and PromDB server :**
 
 All test’s PromDB data is now stored at a designated server and can be viewed at the below portals, by default the last test data is online.
-Grafana dashboard’s : http://grafana-scale-test.apps.cnv2.engineering.redhat.com/, user/password view/view 
+Grafana dashboard’s : http://grafana-scale-test.apps.cnv2.engineering.redhat.com/, user/password view/view or admin / 100yard- 
 Prometheus DB : http://promdb-scale-test.apps.cnv2.engineering.redhat.com/graph
 
 Lab of the server :

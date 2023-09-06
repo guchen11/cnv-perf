@@ -8,9 +8,9 @@ def execute_local_linux_command_base(command):
     print(command)
     # Execute the command
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
-
+    # print(result)
     # Check the command's return code
-    if result.returncode == 0:
+    if result.returncode == 0 or result.stderr == '':
         # Command executed successfully
         output = result.stdout
         print(output)
@@ -19,6 +19,26 @@ def execute_local_linux_command_base(command):
         # Command encountered an error
         error_message = result.stderr
         print(f"Error executing command: {error_message}")
+        return "error"
+
+
+def execute_local_linux_command_base_silent(command):
+    """
+    Basic linux bash command
+    """
+    # Execute the command
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+
+    # Check the command's return code
+    if result.returncode == 0 or result.stderr == '':
+        # Command executed successfully
+        output = result.stdout
+        return output.strip()
+    else:
+        # Command encountered an error
+        error_message = result.stderr
+        print(f"Error executing command: {error_message}")
+        return "error"
 
 
 def deploy_test_at_grafana(test_name):
