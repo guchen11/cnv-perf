@@ -1,16 +1,20 @@
 ```
-setup :
+Copy and run from any system :
+Example:
+rsync -a -Pav -e "ssh -l kni" /home/guchen/cnv-perf {jump host}:/home/kni/
 
-curl -sSL https://install.python-poetry.org | python -
+At jump host :
+
+sudo yum install rsync
+curl -sSL https://install.python-poetry.org | python3 -
 pip install poetry
+cd /home/kni/cnv-perf/
 poetry add paramiko
 poetry add kubernetes
 poetry add openshift
+poetry update package
 
 
-copy and run from any system :
-Example:
-rsync -a -Pav -e "ssh -l kni" /home/guchen/cnv-perf {hostname}:/home/kni/guchen/
 
 **To get all modules in the program:**
 
@@ -68,7 +72,7 @@ Options:
 **Performance Grafana and PromDB server :**
 
 All test’s PromDB data is now stored at a designated server and can be viewed at the below portals, by default the last test data is online.
-Grafana dashboard’s : http://grafana-scale-test.apps.cnv2.engineering.redhat.com/, user/password view/view 
+Grafana dashboard’s : http://grafana-scale-test.apps.cnv2.engineering.redhat.com/, user/password view/view or admin / 100yard- 
 Prometheus DB : http://promdb-scale-test.apps.cnv2.engineering.redhat.com/graph
 
 Lab of the server :

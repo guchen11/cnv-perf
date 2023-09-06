@@ -15,7 +15,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'], max_content_width=12
 command_help = """
     get templates and data_source.
 
-    Example: poetry run python main.py openshift_oc_module oc-get-templates-and-data-source"""
+    Example: poetry run python main.py openshift-oc-module oc-get-templates-and-data-source"""
 
 
 @openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
@@ -72,9 +72,9 @@ def oc_create_vm_golden_image(name, template, data_source, cloud_user_password, 
 command_help = """
     Create vm range from golden image.
 
-    Example: poetry run python main.py openshift_oc_module oc-create-vm-golden-image-range --name fedora-test --template fedora-desktop-tiny 
-    Example: poetry run python main.py openshift_oc_module oc-create-vm-golden-image-range --name fedora-test --template fedora-desktop-tiny 
-    --cloud_user_password 100yard- --data_source fedora --namespace scale-test --start 1 --end 2 """
+    Example: poetry run python main.py openshift_oc_module oc-create-vm-golden-image-range --name fedora-test 
+    --template fedora-desktop-tiny --sleep 0 --cloud_user_password 100yard- --data_source fedora --namespace 
+    scale-test --start 1 --end 2"""
 
 
 @openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
@@ -85,10 +85,12 @@ command_help = """
 @click.option('--namespace', help='set namespace for the VM')
 @click.option('--start', type=int, help='Start index for VM creation')
 @click.option('--end', type=int, help='End index for VM creation')
-def oc_create_vm_golden_image_range(name, template, data_source, cloud_user_password, namespace, start, end):
+@click.option('--sleep', type=int, help='sleep between actions')
+def oc_create_vm_golden_image_range(name, template, data_source, cloud_user_password, namespace, start, end, sleep):
     for i in range(start, end + 1):
         VM_NAME = f"{name}-{i}"
         oc_create_vm_golden_image_base(VM_NAME, template, data_source, cloud_user_password, namespace)
+        time.sleep(sleep)
 
 
 command_help: str = """

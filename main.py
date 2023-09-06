@@ -13,16 +13,16 @@ class Timer:
 
     def __init__(self, description: str) -> None:
         self.description = description
-
+        oc.execute_local_linux_command_base("echo Star time : `date`")
     def __enter__(self):
         self.start = time.time()
 
     def __exit__(self, type, value, traceback):
 
+        oc.execute_local_linux_command_base("echo End time : `date`")
         self.end = time.time()
         elapsed_time = self.end - self.start
         print(f"{self.description}: {elapsed_time}")
-        time.sleep(120)
         self.test_constractor = files_access.get_json_value("utilities/manifests/perf_param.json", "test_constractor")
         self.performance_test = files_access.get_json_value("utilities/manifests/perf_param.json", "performance_test")
         self.test_name = files_access.get_json_value("utilities/manifests/perf_param.json", "test_name")
@@ -33,6 +33,7 @@ class Timer:
                 files_access.update_json_value("utilities/manifests/perf_param.json", "test_constractor", "False")
             else:
                 # If we are inside a performance test execution, switch it off since we have finished
+                time.sleep(10)
                 oc.dump_prometheus(self.test_name)
                 bash.scp_promdb_to_grafana(self.test_name)
                 bash.deploy_test_at_grafana(self.test_name)

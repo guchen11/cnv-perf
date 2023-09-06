@@ -148,7 +148,7 @@ def create_pvc(prefix, namespace, start, end, sleep):
     for i in range(start, end + 1):
         pvc_name = f'{prefix}{i}'
     # Set namespace, VM name, PVC details
-        storage_class_name = "ocs-storagecluster-ceph-rbd"
+        storage_class_name = "ocs-storagecluster-ceph-rbd-virtualization"
         access_modes = "ReadWriteMany"
         storage_size = "1Gi"
 
