@@ -1,4 +1,6 @@
 import json
+import sys
+
 import click
 from commands.cli_command import cli_command_module
 from commands.virtctl import virtctl_module
@@ -14,6 +16,7 @@ class Timer:
     def __init__(self, description: str) -> None:
         self.description = description
         oc.execute_local_linux_command_base("echo Star time : `date`")
+
     def __enter__(self):
         self.start = time.time()
 
@@ -111,6 +114,18 @@ cli.add_command(virtctl_module)  # type: ignore
 cli.add_command(openshift_oc_module)  # type: ignore
 cli.add_command(cli_command_module)  # type: ignore
 
+
+def print_help():
+    """Print help messages for all commands, including child commands."""
+    for command_name, command_obj in cli.commands.items():
+        click.echo(f"\nHelp for command: {command_name}\n")
+        with click.Context(command_obj) as ctx:
+            click.echo(command_obj.get_help(ctx))
+
+
 if __name__ == '__main__':
     with Timer("Command elapsed time (seconds) :"):
-        cli()
+        if '--help' in sys.argv or '-h' in sys.argv:
+            print_help()
+        else:
+            cli()

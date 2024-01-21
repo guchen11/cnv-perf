@@ -1,4 +1,49 @@
 ```
+Summary of commands :
+
+    main.py
+    Commands:
+      set-test-name         Set test name
+      test-constructor      Performance test constructor load run
+      test-destructor       Performance test destructor
+
+    cli-command-module
+    Commands:
+      deploy-test-at-grafana       deploy test at Grafana
+      execute-local-linux-command  Execute local linux command
+      execute-ssh-command          Execute remote ssh command
+      scp-promdb-to-grafana        scp PromDB to Grafana
+      
+    openshift-api-module
+    Commands:    
+      create-namespace  Create namespaces with start and end index.
+      create-pvc        Create pvc with start and end index.
+      create-vm-cirros  Create VMs with start and end index.
+      delete-namespace  Delete namespaces with start and end index.
+      delete-vm         Delete vm with start and end index.
+      
+    openshift-oc-module
+    Commands:
+      attach-detach-pcv-vm            Attach or detach pvc in the given range to VM.
+      create-delete-nncp              Create or delete basic NNCPs on each worker node
+      dump-prometheus                 Dump prometheus data base
+      empty-prometheus                Empty prometheus data base
+      oc-create-vm-golden-image       Create vm from golden image.
+      oc-create-vm-golden-image-range Create vm range from golden image.
+      oc-get-templates-and-data-source get templates and data_source.
+      oc-get-vms-node-spread          get the vms spread on the nodes.
+      set-pvc-interface               Set pvc interface in the given range.
+      test-maximum-pod                Test maximum pods on a cluster.
+      
+    virtctl-module
+    Commands:
+      hotplug-attach-pcv-to-vm  Attach hotplug pvc in the given range to VM.
+      hotplug-detach-pcv-to-vm  Detach hotplug pvc in the given range to VM.
+      migrate-node              Migrate all VMS from a node.
+      start-vms                 Start VMs in the given range.
+      stop-vms                  Stop VMs in the given range.
+      test-vm-start-time        test_vm_start_time
+
 Copy and run from any system :
 Example:
 rsync -a -Pav -e "ssh -l kni" /home/guchen/cnv-perf {jump host}:/home/kni/
