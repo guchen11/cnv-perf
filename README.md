@@ -51,8 +51,11 @@ rsync -a -Pav -e "ssh -l kni" /home/guchen/cnv-perf {jump host}:/home/kni/
 At jump host :
 
 sudo yum install rsync
-curl -sSL https://install.python-poetry.org | python3 -
-pip install poetry
+sudo subscription-manager register --serverurl=subscription.rhsm.stage.redhat.com:443/subscription --baseurl=https://cdn.stage.redhat.com --username={userame} --password={passwor} --auto-attach
+dnf install python3.11
+dnf install python3.11-pip
+curl -sSL https://install.python-poetry.org | python3.11 -
+pip3.11 install poetry
 cd /home/kni/cnv-perf/
 poetry add paramiko
 poetry add kubernetes
@@ -102,7 +105,7 @@ Usage: main.py openshift-oc-module oc-create-vm-golden-image-range [OPTIONS]
   Example: poetry run python main.py openshift_oc_module oc-create-vm-golden-image-range --name fedora-test --template
   fedora-desktop-tiny  Example: poetry run python main.py openshift_oc_module oc-create-vm-golden-image-range --name
   fedora-test --template fedora-desktop-tiny  --cloud_user_password 100yard- --data_source fedora --namespace scale-
-  test --start 1 --end 2
+  test --start 1 --end 2 --sleep 1
 
 Options:
   --name TEXT                 set VM name

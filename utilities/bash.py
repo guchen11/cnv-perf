@@ -1,7 +1,7 @@
 import subprocess
 
 
-def execute_local_linux_command_base(command):
+def execute_local_linux_command_base(command: object) -> object:
     """
     Basic linux bash command
     """

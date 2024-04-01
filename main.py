@@ -6,6 +6,8 @@ from commands.cli_command import cli_command_module
 from commands.virtctl import virtctl_module
 from commands.openshift_oc import openshift_oc_module
 from commands.openshift_api import openshift_api_module
+from commands.tests import tests_module
+
 import time
 from utilities import bash
 from utilities import files_access, oc
@@ -113,6 +115,7 @@ cli.add_command(openshift_api_module)  # type: ignore
 cli.add_command(virtctl_module)  # type: ignore
 cli.add_command(openshift_oc_module)  # type: ignore
 cli.add_command(cli_command_module)  # type: ignore
+cli.add_command(tests_module)
 
 
 def print_help():
@@ -125,7 +128,8 @@ def print_help():
 
 if __name__ == '__main__':
     with Timer("Command elapsed time (seconds) :"):
-        if '--help' in sys.argv or '-h' in sys.argv:
-            print_help()
-        else:
-            cli()
+        #if '--help' in sys.argv or '-h' in sys.argv:
+        #    print_help()
+        #    cli()
+        #else:
+        cli()
