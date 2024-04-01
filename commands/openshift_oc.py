@@ -239,3 +239,29 @@ def test_maximum_pod(replicas):
 
     command = f"echo '{template_str}' | oc delete -f -"
     execute_local_linux_command_base(command)
+
+
+command_help: str = """
+    patch_ssh_publickey_vm in the given range to VM.
+    
+    First make sure you have a secret : oc create secret generic ssh-rsa-pub-guykey --from-file=ssh-publickey=/root/.ssh/public_key.pub
+    
+    Then add it after the vm created : 
+    Example: patch-ssh-publickey-vm --namespace scale-test --prefix centos7-test- --start 1 --end 1 --sleep 0 
+    """
+
+
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@click.option('--namespace', help='Namespace for VM creation')
+@click.option('--prefix', help='Prefix for PVC names')
+@click.option('--start', type=int, help='Start index for PVC')
+@click.option('--end', type=int, help='End index for PVC')
+@click.option('--sleep', type=int, help='sleep between PVC attach')
+def patch_ssh_publickey_vm(namespace, prefix, start, end, sleep):
+    for i in range(start, end + 1):
+        template = files_access.load_template("utilities/manifests/sshKeySecret.json")
+        template_str = json.dumps(template)
+        command = f"oc patch vm '{prefix}{i}' -n {namespace} --type merge -p='{template_str}'"
+        execute_local_linux_command_base(command)
+        time.sleep(sleep)
+

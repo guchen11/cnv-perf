@@ -25,7 +25,7 @@
                 "storage": "100M"
               }
             },
-            "storageClassName": "ocs-storagecluster-ceph-rbd",
+            "storageClassName": "ocs-storagecluster-ceph-rbd-virtualization",
             "volumeMode": "Block"
           },
           "source": {
@@ -60,7 +60,8 @@
           },
           "resources": {
             "requests": {
-              "memory": "64M"
+              "memory": "64M",
+              "cpu": "100m"
             }
           }
         },
