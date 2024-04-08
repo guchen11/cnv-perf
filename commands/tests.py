@@ -1,13 +1,11 @@
 from concurrent.futures import ThreadPoolExecutor
 import concurrent
-import time
 import logging
-import threading
 import time
 from utilities.bash import execute_local_linux_command_base
 import click
 
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'], max_content_width=120)
+CONTEXT_SETTINGS = dict(max_content_width=120)
 
 @click.group()
 def tests_module():
@@ -20,15 +18,15 @@ command_help = """
     --template centos7-desktop-tiny --data_source centos7 --sleep 0 --user {user}} --namespace scale-test --start 1 --end 2"""
 
 
-@tests_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
-@click.option('--prefix', help='set VM name')
-@click.option('--data_source', help='data_source')
-@click.option('--template', help='set template name')
-@click.option('--user', help='user of the vm')
-@click.option('--namespace', help='set namespace for the VM')
-@click.option('--start', type=int, help='Start index for VM creation')
-@click.option('--end', type=int, help='End index for VM creation')
-@click.option('--sleep', type=int, help='sleep between actions')
+@tests_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--prefix', help=click.style('set VM name'))
+@click.option('--data_source', help=click.style('data_source'))
+@click.option('--template', help=click.style('set template name'))
+@click.option('--user', help=click.style('user of the vm'))
+@click.option('--namespace', help=click.style('set namespace for the VM'))
+@click.option('--start', type=int, help=click.style('Start index for VM creation'))
+@click.option('--end', type=int, help=click.style('End index for VM creation'))
+@click.option('--sleep', type=int, help=click.style('sleep between actions'))
 def create_vm_golden_image_with_ssh_publickey_and_test(prefix, template, data_source, user, namespace, start, end, sleep):
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
     print("CREATE VMS")
@@ -64,12 +62,12 @@ command_help = """
     Example: poetry run python main.py tests-module check-vms-ssh-alive-threadpool --prefix entos7-test 
     --sleep 0 --user centos --start 1 --end 2"""
 
-@tests_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
-@click.option('--prefix', help='set VM name')
-@click.option('--user', help='user of the vm')
-@click.option('--start', type=int, help='Start index for VM creation')
-@click.option('--end', type=int, help='End index for VM creation')
-@click.option('--sleep', type=int, help='sleep between actions')
+@tests_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--prefix', help=click.style('set VM name'))
+@click.option('--user', help=click.style('user of the vm'))
+@click.option('--start', type=int, help=click.style('Start index for VM creation'))
+@click.option('--end', type=int, help=click.style('End index for VM creation'))
+@click.option('--sleep', type=int, help=click.style('sleep between actions'))
 def check_vms_ssh_alive_threadpool(prefix, user, start, end, sleep):
     command = f"poetry run python main.py virtctl-module check-vms-ssh-alive --prefix {prefix}- --username={user} --start {start} --end {end} --sleep {sleep} | grep -c CentOS "
     format = "%(asctime)s: %(message)s"

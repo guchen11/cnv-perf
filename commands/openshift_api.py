@@ -13,7 +13,7 @@ def openshift_api_module():
     pass
 
 
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'], max_content_width=120)
+CONTEXT_SETTINGS = dict(max_content_width=120)
 
 command_help: str = """
     Create namespaces with start and end index.
@@ -23,9 +23,9 @@ command_help: str = """
     """
 
 
-@openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
-@click.option('--start', type=int, help='Start index for namespace creation')
-@click.option('--end', type=int, help='End index for namespace creation')
+@openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--start', type=int, help=click.style('Start index for namespace creation', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for namespace creation', fg='magenta'))
 def create_namespace(start, end):
     k8s_client = config.new_client_from_config()
     dyn_client = DynamicClient(k8s_client)
@@ -49,12 +49,12 @@ command_help: str = """
     """
 
 
-@openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
-@click.option('--prefix', help='Prefix for VM names')
-@click.option('--namespace', help='Namespace for VM creation')
-@click.option('--start', type=int, help='Start index for VM creation')
-@click.option('--end', type=int, help='End index for VM creation')
-@click.option('--sleep', type=int, help='sleep between VMSs')
+@openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--prefix', help=click.style('Prefix for VM names', fg='magenta'))
+@click.option('--namespace', help=click.style('Namespace for VM creation', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for VM creation', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for VM creation', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between VMSs', fg='magenta'))
 def create_vm_cirros(prefix, namespace, start, end, sleep):
     k8s_client = config.new_client_from_config()
     dyn_client = DynamicClient(k8s_client)
@@ -81,9 +81,9 @@ command_help = """
     """
 
 
-@openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
-@click.option('--start', type=int, help='Start index for namespace deletion')
-@click.option('--end', type=int, help='End index for namespace deletion')
+@openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--start', type=int, help=click.style('Start index for namespace deletion', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for namespace deletion', fg='magenta'))
 def delete_namespace(start, end):
     k8s_client = config.new_client_from_config()
     dyn_client = DynamicClient(k8s_client)
@@ -103,11 +103,11 @@ command_help = """
     """
 
 
-@openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
-@click.option('--prefix', help='Prefix for VM names')
-@click.option('--namespace', help='Namespace for VM deletion')
-@click.option('--start', type=int, help='Start index for VM deletion')
-@click.option('--end', type=int, help='End index for VM deletion')
+@openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--prefix', help=click.style('Prefix for VM names', fg='magenta'))
+@click.option('--namespace', help=click.style('Namespace for VM deletion', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for VM deletion', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for VM deletion', fg='magenta'))
 def delete_vm(prefix, namespace, start, end):
     k8s_client = config.new_client_from_config()
     dyn_client = DynamicClient(k8s_client)
@@ -129,12 +129,12 @@ command_help: str = """
     This will create pvc from 'pvc-test-1' to 'pvc-test-2'.
     """
 
-@openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
-@click.option('--prefix', help='Prefix for PVC names')
-@click.option('--namespace', help='Namespace for PVC creation')
-@click.option('--start', type=int, help='Start index for PVC creation')
-@click.option('--end', type=int, help='End index for PVC creation')
-@click.option('--sleep', type=int, help='sleep between PVCs')
+@openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--prefix', help=click.style('Prefix for PVC names', fg='magenta'))
+@click.option('--namespace', help=click.style('Namespace for PVC creation', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for PVC creation', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for PVC creation', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between PVCs', fg='magenta'))
 def create_pvc(prefix, namespace, start, end, sleep):
     # Load OpenShift configuration from default kubeconfig file
     config.load_kube_config()

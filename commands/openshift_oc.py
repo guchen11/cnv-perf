@@ -10,7 +10,7 @@ def openshift_oc_module():
     pass
 
 
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'], max_content_width=120)
+CONTEXT_SETTINGS = dict(max_content_width=120)
 
 command_help = """
     get templates and data_source.
@@ -18,7 +18,7 @@ command_help = """
     Example: poetry run python main.py openshift-oc-module oc-get-templates-and-data-source"""
 
 
-@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
 def oc_get_templates_and_data_source():
     # Execute the command
     command = "/usr/local/bin/oc -n openshift get template -l template.kubevirt.io/type=base -o jsonpath=\'{range " \
@@ -29,10 +29,10 @@ def oc_get_templates_and_data_source():
 command_help = """
     get the vms spread on the nodes.
 
-    Example: poetry run python main.py openshift_oc_module oc_get_vms_node_spread"""
+    Example: poetry run python main.py openshift-oc-module oc_get_vms_node_spread"""
 
 
-@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
 def oc_get_vms_node_spread():
     # Execute the command
     command = "for node in $(oc get nodes | grep -v master | grep -v NAME | awk '{print $1}'); do  echo $node ; oc " \
@@ -55,16 +55,16 @@ def oc_create_vm_golden_image_base(name, template, data_source, cloud_user_passw
 command_help = """
     Create vm from golden image.
 
-    Example: poetry run python main.py openshift_oc_module oc-create-vm-golden-image --name fedora-test-1 --template fedora-desktop-tiny 
+    Example: poetry run python main.py openshift-oc-module oc-create-vm-golden-image --name fedora-test-1 --template fedora-desktop-tiny 
     --cloud_user_password 100yard- --data_source fedora --namespace scale-test"""
 
 
-@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
-@click.option('--name', help='set VM name')
-@click.option('--template', help='set template name')
-@click.option('--cloud_user_password', help='set cloud user password')
-@click.option('--data_source', help='get data source name of the image')
-@click.option('--namespace', help='set namespace for the VM')
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--name', help=click.style('set VM name', fg='magenta'))
+@click.option('--template', help=click.style('set template name', fg='magenta'))
+@click.option('--cloud_user_password', help=click.style('set cloud user password', fg='magenta'))
+@click.option('--data_source', help=click.style('get data source name of the image', fg='magenta'))
+@click.option('--namespace', help=click.style('set namespace for the VM', fg='magenta'))
 def oc_create_vm_golden_image(name, template, data_source, cloud_user_password, namespace):
     oc_create_vm_golden_image_base(name, template, data_source, cloud_user_password, namespace)
 
@@ -72,20 +72,20 @@ def oc_create_vm_golden_image(name, template, data_source, cloud_user_password, 
 command_help = """
     Create vm range from golden image.
 
-    Example: poetry run python main.py openshift_oc_module oc-create-vm-golden-image-range --name fedora-test 
+    Example: poetry run python main.py openshift-oc-module oc-create-vm-golden-image-range --name fedora-test 
     --template fedora-desktop-tiny --sleep 0 --cloud_user_password 100yard- --data_source fedora --namespace 
     scale-test --start 1 --end 2"""
 
 
-@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
-@click.option('--name', help='set VM name')
-@click.option('--template', help='set template name')
-@click.option('--cloud_user_password', help='set cloud user password')
-@click.option('--data_source', help='get data source name of the image')
-@click.option('--namespace', help='set namespace for the VM')
-@click.option('--start', type=int, help='Start index for VM creation')
-@click.option('--end', type=int, help='End index for VM creation')
-@click.option('--sleep', type=int, help='sleep between actions')
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--name', help=click.style('set VM name', fg='magenta'))
+@click.option('--template', help=click.style('set template name', fg='magenta'))
+@click.option('--cloud_user_password', help=click.style('set cloud user password', fg='magenta'))
+@click.option('--data_source', help=click.style('get data source name of the image', fg='magenta'))
+@click.option('--namespace', help=click.style('set namespace for the VM', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for VM creation', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for VM creation', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between actions', fg='magenta'))
 def oc_create_vm_golden_image_range(name, template, data_source, cloud_user_password, namespace, start, end, sleep):
     for i in range(start, end + 1):
         VM_NAME = f"{name}-{i}"
@@ -101,14 +101,14 @@ command_help: str = """
     """
 
 
-@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
-@click.option('--vm_name', help='VM names')
-@click.option('--namespace', help='Namespace for VM creation')
-@click.option('--op', help='operation on the vm')
-@click.option('--prefix', help='Prefix for PVC names')
-@click.option('--start', type=int, help='Start index for PVC')
-@click.option('--end', type=int, help='End index for PVC')
-@click.option('--sleep', type=int, help='sleep between PVC attach')
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--vm_name', help=click.style('VM names', fg='magenta'))
+@click.option('--namespace', help=click.style('Namespace for VM creation', fg='magenta'))
+@click.option('--op', help=click.style('operation on the vm', fg='magenta'))
+@click.option('--prefix', help=click.style('Prefix for PVC names', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for PVC', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for PVC', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between PVC attach', fg='magenta'))
 def attach_detach_pcv_vm(vm_name, namespace, op, prefix, start, end, sleep):
     for i in range(start, end + 1):
         template = files_access.load_template("utilities/manifests/add_pvc_to_vm.json")
@@ -131,14 +131,14 @@ command_help: str = """
     """
 
 
-@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
-@click.option('--vm_name', help='VM names')
-@click.option('--namespace', help='Namespace for VM')
-@click.option('--interface', help='Interface of the pvc')
-@click.option('--prefix', help='Prefix for PVC names')
-@click.option('--start', type=int, help='Start index for PVC')
-@click.option('--end', type=int, help='End index for PVC')
-@click.option('--sleep', type=int, help='sleep between PVC attach')
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--vm_name', help=click.style('VM names', fg='magenta'))
+@click.option('--namespace', help=click.style('Namespace for VM', fg='magenta'))
+@click.option('--interface', help=click.style('Interface of the pvc', fg='magenta'))
+@click.option('--prefix', help=click.style('Prefix for PVC names', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for PVC', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for PVC', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between PVC attach', fg='magenta'))
 def set_pvc_interface(vm_name, namespace, interface, prefix, start, end, sleep):
     for i in range(start, end + 1):
         template = files_access.load_template("utilities/manifests/set_pvc_interface.json")
@@ -161,11 +161,11 @@ command_help: str = """
     """
 
 
-@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
-@click.option('--op', help='operation for NNCPs')
-@click.option('--start', type=int, help='Start index for NNCPs')
-@click.option('--end', type=int, help='End index for NNCPs')
-@click.option('--sleep', type=int, help='sleep between NNCPs attach')
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--op', help=click.style('operation for NNCPs', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for NNCPs', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for NNCPs', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between NNCPs attach', fg='magenta'))
 def create_delete_nncp(op, start, end, sleep):
     for i in range(start, end + 1):
         template = files_access.load_template("utilities/manifests/NodeNetworkConfigurationPolicy.json")
@@ -195,7 +195,7 @@ command_help: str = """
     """
 
 
-@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
 def empty_prometheus():
     oc.empty_prometheus()
 
@@ -205,7 +205,7 @@ command_help: str = """
     """
 
 
-@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
 @click.argument('test_name', type=click.STRING, required=True)
 def dump_prometheus(test_name):
     oc.dump_prometheus(test_name)
@@ -219,8 +219,8 @@ command_help: str = """
     """
 
 
-@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
-@click.option('--replicas', help='number of replicas')
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--replicas', help=click.style('number of replicas'))
 def test_maximum_pod(replicas):
     template = files_access.load_template("utilities/manifests/maxPod.json")
     template["spec"]["replicas"] = int(replicas)
@@ -251,12 +251,12 @@ command_help: str = """
     """
 
 
-@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
-@click.option('--namespace', help='Namespace for VM creation')
-@click.option('--prefix', help='Prefix for PVC names')
-@click.option('--start', type=int, help='Start index for PVC')
-@click.option('--end', type=int, help='End index for PVC')
-@click.option('--sleep', type=int, help='sleep between PVC attach')
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--namespace', help=click.style('Namespace for VM creation'))
+@click.option('--prefix', help=click.style('Prefix for PVC names'))
+@click.option('--start', type=int, help=click.style('Start index for PVC'))
+@click.option('--end', type=int, help=click.style('End index for PVC'))
+@click.option('--sleep', type=int, help=click.style('sleep between PVC attach'))
 def patch_ssh_publickey_vm(namespace, prefix, start, end, sleep):
     for i in range(start, end + 1):
         template = files_access.load_template("utilities/manifests/sshKeySecret.json")
