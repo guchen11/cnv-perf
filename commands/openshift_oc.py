@@ -3,6 +3,7 @@ import time
 import click
 from utilities import files_access, oc
 from utilities.bash import execute_local_linux_command_base
+from commands.virtctl import run_virtctl
 
 
 @click.group()
@@ -74,7 +75,7 @@ command_help = """
 
     Example: poetry run python main.py openshift-oc-module oc-create-vm-golden-image-range --name fedora-test 
     --template fedora-desktop-tiny --sleep 0 --cloud_user_password 100yard- --data_source fedora --namespace 
-    scale-test --start 1 --end 2"""
+    scale-test --start 1 --end 2 --running True"""
 
 
 @openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
@@ -86,12 +87,16 @@ command_help = """
 @click.option('--start', type=int, help=click.style('Start index for VM creation', fg='magenta'))
 @click.option('--end', type=int, help=click.style('End index for VM creation', fg='magenta'))
 @click.option('--sleep', type=int, help=click.style('sleep between actions', fg='magenta'))
-def oc_create_vm_golden_image_range(name, template, data_source, cloud_user_password, namespace, start, end, sleep):
+@click.option('--running', type=bool, help=click.style('True if to run the VMS', fg='magenta'))
+def oc_create_vm_golden_image_range(name, template, data_source, cloud_user_password, namespace, start, end, sleep,
+                                    running):
     for i in range(start, end + 1):
         VM_NAME = f"{name}-{i}"
         oc_create_vm_golden_image_base(VM_NAME, template, data_source, cloud_user_password, namespace)
         time.sleep(sleep)
-
+        if running:
+            click.echo(run_virtctl(['start', VM_NAME]))
+            time.sleep(sleep)
 
 command_help: str = """
     Attach or detach pvc in the given range to VM.
@@ -264,4 +269,3 @@ def patch_ssh_publickey_vm(namespace, prefix, start, end, sleep):
         command = f"oc patch vm '{prefix}{i}' -n {namespace} --type merge -p='{template_str}'"
         execute_local_linux_command_base(command)
         time.sleep(sleep)
-
