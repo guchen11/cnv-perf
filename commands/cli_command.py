@@ -3,7 +3,7 @@ import paramiko
 from utilities.bash import execute_local_linux_command_base
 from utilities import bash
 
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'], max_content_width=120)
+CONTEXT_SETTINGS = dict(max_content_width=120)
 
 
 @click.group()
@@ -11,7 +11,10 @@ def cli_command_module():
     pass
 
 
-@cli_command_module.command(context_settings=CONTEXT_SETTINGS, help='Execute local linux command')
+command_help: str = "Execute local linux command"
+
+
+@cli_command_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
 @click.argument('command', type=click.STRING, required=True)
 def execute_local_linux_command(command):
     """
@@ -28,8 +31,9 @@ def execute_local_linux_command(command):
     """
     execute_local_linux_command_base(command)
 
+command_help: str = "Execute remote ssh command"
 
-@cli_command_module.command(context_settings=CONTEXT_SETTINGS, help='Execute remote ssh command')
+@cli_command_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
 @click.argument('hostname', type=str, required=True)
 @click.argument('username', type=str, required=True)
 @click.argument('command', type=str, required=True)
@@ -77,7 +81,7 @@ command_help: str = """
     """
 
 
-@cli_command_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@cli_command_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
 @click.argument('test_name', type=click.STRING, required=True)
 def scp_promdb_to_grafana(test_name):
     bash.scp_promdb_to_grafana(test_name)
@@ -95,7 +99,7 @@ command_help: str = """
     """
 
 
-@cli_command_module.command(context_settings=CONTEXT_SETTINGS, help=command_help)
+@cli_command_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
 @click.argument('test_name', type=click.STRING, required=True)
 def deploy_test_at_grafana(test_name):
     bash.deploy_test_at_grafana(test_name)
