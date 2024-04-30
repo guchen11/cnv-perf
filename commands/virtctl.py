@@ -10,16 +10,21 @@ import click
 
 def run_virtctl(args):
     command = ['virtctl'] + args
-    #print("Executing command:", ' '.join(command))
-    result = subprocess.run(command, capture_output=True, text=True)
-    if result.returncode == 0:
-        output = result.stdout
-        #print("Command output:", output)
-        return output
-    else:
-        error_message = result.stderr.strip()
-        print("Error:", error_message)
-        raise RuntimeError(f"Command failed with error: {error_message}")
+    print("Executing command:", ' '.join(command))
+    try:
+        # Run a command
+        result = subprocess.run(command, capture_output=True, text=True)
+        if result.returncode == 0:
+            output = result.stdout
+            # print("Command output:", output)
+            return output
+        else:
+            error_message = result.stderr.strip()
+            print("Error:", error_message)
+            return error_message
+    except subprocess.CalledProcessError as e:
+        # Handle the error
+        print("Fatal Error:", e)
 
 def clear_known_hosts():
     known_hosts_path = os.path.expanduser("~/.ssh/known_hosts")
@@ -94,7 +99,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'], max_content_width=12
 command_help: str = """
     Attach hotplug pvc in the given range to VM.
 
-    Example: hotplug-attach-pcv-to-vm --vm_name rhel9-server --prefix pvc-test- --start 1 --end 2 --final_attached_disk 2 --vm_up True --sleep 2 
+    Example: hotplug-attach-pcv-to-vm --vm_name rhel9-server --prefix pvc-test- --start 1 --end 2 --sleep 2 
     This will attach PVCs from 'pvc-test-1' to 'pvc-test-2'.
     """
 
@@ -104,23 +109,18 @@ command_help: str = """
 @click.option('--prefix',help=click.style('Prefix for PVC names', fg='magenta'))
 @click.option('--start', type=int,help=click.style('Start index for PVC', fg='magenta'))
 @click.option('--end', type=int,help=click.style('End index for PVC', fg='magenta'))
-@click.option('--final_attached_disk', type=int,help=click.style('expected final disk', fg='magenta'))
-@click.option('--vm_up',help=click.style('write True if vm is up', fg='magenta'))
 @click.option('--sleep', type=int,help=click.style('sleep between PVC attach', fg='magenta'))
-def hotplug_attach_pcv_to_vm(vm_name, prefix, start, end, final_attached_disk, vm_up, sleep):
+def hotplug_attach_pcv_to_vm(vm_name, prefix, start, end, sleep):
     error_result = 0
     start_time = time.time()
-    if vm_up == "True":
-        current_attached_disk = execute_local_linux_command_base(
-            "sshpass -p '100yard-' ssh -o StrictHostKeyChecking=no -p 31302 cloud-user@console-openshift-console.apps.guchen734.alias.bos.scalelab.redhat.com 'lsblk | grep -c 1G'")
-    virt_handler_logs_start = execute_local_linux_command_base(
-        "oc get po -n openshift-cnv | grep \"virt-handler-\" |  awk '{print $1}' |  xargs -I index sh -c 'oc logs index -c virt-handler -n openshift-cnv | grep -c \"Synchronizing the VirtualMachineInstance failed.\"'")
     for i in range(start, end + 1):
         pvc_name = f'{prefix}{i}'
         return_code = run_virtctl(['addvolume', vm_name, '--volume-name=' + pvc_name, '--persist'])
-        if return_code != 0:
+        if "error" in return_code:
+            print(f"error adding {pvc_name}")
+            print(f"{return_code}")
             error_result = error_result + 1
-        while return_code != 0:
+        while "error" in return_code:
             time.sleep(2)
             return_code = run_virtctl(['addvolume', vm_name, '--volume-name=' + pvc_name, '--persist'])
         time.sleep(sleep)
@@ -128,25 +128,6 @@ def hotplug_attach_pcv_to_vm(vm_name, prefix, start, end, final_attached_disk, v
     end_time = time.time()
     elapsed_time = end_time - start_time
     print(f"Add volume command time : {elapsed_time}")
-    if vm_up == "True":
-        print(f"final_attached_disk : {final_attached_disk}")
-        print(f"current_attached_disk : {current_attached_disk}")
-        if current_attached_disk != "":
-            index = 0
-            while int(current_attached_disk) != final_attached_disk:
-                time.sleep(1)
-                current_attached_disk = execute_local_linux_command_base_silent(
-                    "sshpass -p '100yard-' ssh -o StrictHostKeyChecking=no -p 31302 cloud-user@console-openshift-console.apps.guchen734.alias.bos.scalelab.redhat.com 'lsblk | grep -c 1G'")
-                if current_attached_disk == "":
-                    break
-                index = index + 1
-                if index == 600:
-                    print(f"Timeout on lsblk")
-                    break
-
-    print(f"virt_handler logs start on the test :")
-    print(virt_handler_logs_start)
-    print(f"virt_handler logs now on the test :")
     execute_local_linux_command_base(
         "oc get po -n openshift-cnv | grep \"virt-handler-\" |  awk '{print $1}' |  xargs -I index sh -c 'oc logs index -c virt-handler -n openshift-cnv | grep -c \"Synchronizing the VirtualMachineInstance failed.\"'")
 
@@ -155,7 +136,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'], max_content_width=12
 command_help: str = """
     Detach hotplug pvc in the given range to VM.
 
-    Example: hotplug-detach-pcv-to-vm --vm_name rhel9-server --prefix pvc-test- --start 1 --end 2 --final_attached_disk 2 --vm_up True --sleep 2 
+    Example: hotplug-detach-pcv-to-vm --vm_name rhel9-server --prefix pvc-test- --start 1 --end 2 --sleep 2 
     This will detach PVCs from 'pvc-test-1' to 'pvc-test-2'.
     """
 
@@ -165,51 +146,23 @@ command_help: str = """
 @click.option('--prefix',help=click.style('Prefix for PVC names', fg='magenta'))
 @click.option('--start', type=int,help=click.style('Start index for PVC', fg='magenta'))
 @click.option('--end', type=int,help=click.style('End index for PVC', fg='magenta'))
-@click.option('--vm_up',help=click.style('write True if vm is up', fg='magenta'))
 @click.option('--sleep', type=int,help=click.style('sleep between PVC attach', fg='magenta'))
-@click.option('--final_attached_disk', type=int,help=click.style('expected final disk', fg='magenta'))
-def hotplug_detach_pcv_to_vm(vm_name, prefix, start, end, final_attached_disk, vm_up, sleep):
+def hotplug_detach_pcv_to_vm(vm_name, prefix, start, end, sleep):
     error_result = 0
     start_time = time.time()
-    if vm_up == "True":
-        current_attached_disk = execute_local_linux_command_base(
-            "sshpass -p '100yard-' ssh -o StrictHostKeyChecking=no -p 31302 cloud-user@console-openshift-console.apps.guchen734.alias.bos.scalelab.redhat.com 'lsblk | grep -c 1G'")
-    virt_handler_logs_start = execute_local_linux_command_base(
-        "oc get po -n openshift-cnv | grep \"virt-handler-\" |  awk '{print $1}' |  xargs -I index sh -c 'oc logs index -c virt-handler -n openshift-cnv | grep -c \"Synchronizing the VirtualMachineInstance failed.\"'")
     for i in range(start, end + 1):
         pvc_name = f'{prefix}{i}'
         return_code = run_virtctl(['removevolume', vm_name, '--volume-name=' + pvc_name, '--persist'])
-        if return_code != 0:
+        if "error" in return_code:
             error_result = error_result + 1
-        while return_code != 0:
-            time.sleep(2)
-            return_code = run_virtctl(['removevolume', vm_name, '--volume-name=' + pvc_name, '--persist'])
+#        while "error" in return_code != 0:
+#            time.sleep(2)
+#            return_code = run_virtctl(['removevolume', vm_name, '--volume-name=' + pvc_name, '--persist'])
         time.sleep(sleep)
     print(f'Out of {end + 1 - start} actions {error_result} have failed')
     end_time = time.time()
     elapsed_time = end_time - start_time
     print(f"Remove volume command time : {elapsed_time}")
-    if vm_up == "True":
-        print(f"final_attached_disk : {final_attached_disk}")
-        print(f"current_attached_disk : {current_attached_disk}")
-        if current_attached_disk != "":
-            index = 0
-            while int(current_attached_disk) != final_attached_disk:
-                time.sleep(1)
-                current_attached_disk = execute_local_linux_command_base_silent(
-                    "sshpass -p '100yard-' ssh -o StrictHostKeyChecking=no -p 31302 cloud-user@console-openshift-console.apps.guchen734.alias.bos.scalelab.redhat.com 'lsblk | grep -c 1G'")
-                if current_attached_disk == "":
-                    break
-                index = index + 1
-                if index == 600:
-                    print(f"Timeout on lsblk")
-                    break
-
-    print(f"virt_handler logs start on the test :")
-    print(virt_handler_logs_start)
-    print(f"virt_handler logs now on the test :")
-    execute_local_linux_command_base(
-        "oc get po -n openshift-cnv | grep \"virt-handler-\" |  awk '{print $1}' |  xargs -I index sh -c 'oc logs index -c virt-handler -n openshift-cnv | grep -c \"Synchronizing the VirtualMachineInstance failed.\"'")
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'], max_content_width=120)
