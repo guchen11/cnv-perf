@@ -268,7 +268,7 @@ def execute_command_vms_concurrent(command, prefix, username, start, end, sleep)
     format = "%(asctime)s: %(message)s"
     logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
         vm_names = [f'{prefix}{i}' for i in range(start, end + 1)]
         executor.map(thread_function, vm_names)
 
@@ -307,7 +307,7 @@ def check_vms_ssh_alive_concurrent(prefix, username, start, end, sleep):
     format = "%(asctime)s: %(message)s"
     logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
         vm_names = [f'{prefix}{i}' for i in range(start, end + 1)]
         executor.map(thread_function, vm_names)
     logging.info("!!!!!!!!!!!!!!!!!!!!!")

@@ -14,8 +14,9 @@ def tests_module():
 command_help = """
     Create vm range from golden image.
 
-    Example: poetry run python main.py tests_module create-vm_golden-image-with-ssh-publickey-and-test --prefix centos7-test 
-    --template centos7-desktop-tiny --data_source centos7 --sleep 0 --user {user}} --namespace scale-test --start 1 --end 2"""
+    Example: poetry run python main.py tests-module create-vm_golden-image-with-ssh-publickey-and-test --prefix fedora-server-large 
+    --template fedora-server-large --data_source fedora --sleep 0 --user fedora --namespace scale-test --start 1 --end 10
+    --startVM False --isAlive False"""
 
 
 @tests_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
@@ -27,7 +28,10 @@ command_help = """
 @click.option('--start', type=int, help=click.style('Start index for VM creation'))
 @click.option('--end', type=int, help=click.style('End index for VM creation'))
 @click.option('--sleep', type=int, help=click.style('sleep between actions'))
-def create_vm_golden_image_with_ssh_publickey_and_test(prefix, template, data_source, user, namespace, start, end, sleep):
+@click.option('--start_vm', type=bool, default=False, help=click.style('Start the VM'))
+@click.option('--is_alive', type=bool, default=False, help=click.style('Test if VM alive via ssh'))
+
+def create_vm_golden_image_with_ssh_publickey_and_test(prefix, template, data_source, user, namespace, start, end, sleep,start_vm, is_alive):
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
     print("CREATE VMS")
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
@@ -38,17 +42,19 @@ def create_vm_golden_image_with_ssh_publickey_and_test(prefix, template, data_so
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
     execute_local_linux_command_base(
         f"poetry run python main.py openshift-oc-module patch-ssh-publickey-vm --namespace {namespace} --prefix {prefix}- --start {start} --end {end} --sleep {sleep}")
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
-    print("START VMS")
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
-    execute_local_linux_command_base(
-        f"poetry run python main.py virtctl-module start-vms --prefix {prefix}- --start {start} --end {end} --sleep {sleep}")
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
-    print("TEST IF VMS ARE ALIVE")
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
-    time.sleep(5)
-    execute_local_linux_command_base(
-        f"poetry run python main.py virtctl-module check-vms-ssh-alive --prefix {prefix}- --username={user} --start {start} --end {end} --sleep {sleep} | grep -c {user}  ")
+    if (start_vm):
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
+        print("START VMS")
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
+        execute_local_linux_command_base(
+            f"poetry run python main.py virtctl-module start-vms --prefix {prefix}- --start {start} --end {end} --sleep {sleep}")
+    if(is_alive):
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
+        print("TEST IF VMS ARE ALIVE")
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
+        time.sleep(10)
+        execute_local_linux_command_base(
+            f"poetry run python main.py virtctl-module check-vms-ssh-alive --prefix {prefix}- --username={user} --start {start} --end {end} --sleep {sleep} | grep -c {user}  ")
 
 def thread_function(name):
     logging.info("Thread %s: starting", name)
