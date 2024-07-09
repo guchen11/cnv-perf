@@ -54,7 +54,7 @@ def oc_create_vm_golden_image_base(name, template, data_source, cloud_user_passw
 
 
 command_help = """
-    Create vm from golden image.
+    Create vm from golden image.g
 
     Example: poetry run python main.py openshift-oc-module oc-create-vm-golden-image --name fedora-test-1 --template fedora-desktop-tiny 
     --cloud_user_password 100yard- --data_source fedora --namespace scale-test"""
@@ -74,7 +74,7 @@ command_help = """
     Create vm range from golden image.
 
     Example: poetry run python main.py openshift-oc-module oc-create-vm-golden-image-range --name fedora-test 
-    --template fedora-desktop-tiny --sleep 0 --cloud_user_password 100yard- --data_source fedora --namespace 
+    --template fedora-desktop-tiny --sleep 0 --cloud-user-password 100yard- --data_source fedora --namespace 
     scale-test --start 1 --end 2 --running True"""
 
 
@@ -161,7 +161,7 @@ def set_pvc_interface(vm_name, namespace, interface, prefix, start, end, sleep):
 command_help: str = """
     Create or delete basic NNCPs on each worker node 
 
-    Example: create-delete-nncp --op create --start 1 --end 1 --sleep 0 
+    Example: create-delete-nncp --op create --start 1 --end 1 --sleep 0 --vlan True
     This will create NodeNetworkConfigurationPolicy from 'br-scale-1' to 'br-scale-2'.
     """
 
@@ -171,9 +171,13 @@ command_help: str = """
 @click.option('--start', type=int, help=click.style('Start index for NNCPs', fg='magenta'))
 @click.option('--end', type=int, help=click.style('End index for NNCPs', fg='magenta'))
 @click.option('--sleep', type=int, help=click.style('sleep between NNCPs attach', fg='magenta'))
-def create_delete_nncp(op, start, end, sleep):
+@click.option('--vlan', type=bool, default=False, help=click.style('True if added vlan connected to node'))
+def create_delete_nncp(op, start, end, sleep, vlan):
     for i in range(start, end + 1):
-        template = files_access.load_template("utilities/manifests/NodeNetworkConfigurationPolicy.json")
+        if (vlan):
+            template = files_access.load_template("utilities/manifests/NodeNetworkConfigurationPolicyWithVLAN.json")
+        else:
+            template = files_access.load_template("utilities/manifests/NodeNetworkConfigurationPolicy.json")
         template_str = json.dumps(template)
         modified_template = template_str.replace("{{index}}", f'{i}')
         command = f"echo '{modified_template}' | oc '{op}' -f -"
