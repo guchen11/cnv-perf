@@ -6,12 +6,45 @@ from utilities.bash import execute_local_linux_command_base
 from commands.virtctl import run_virtctl
 
 
+def create_debug_pod():
+    template = files_access.load_template("utilities/manifests/debug-pod.json")
+    template_str = json.dumps(template)
+    command = f"echo '{template_str}' | oc create -f -"
+    execute_local_linux_command_base(command)
+    time.sleep(3)
+    command = "oc exec -it my-debug-pod-automation -- /bin/bash -c \"yum install sshpass -y\""
+    execute_local_linux_command_base(command)
+
+
+def delete_debug_pod():
+    command = "oc delete po my-debug-pod-automation"
+    execute_local_linux_command_base(command)
+
+
 @click.group()
 def openshift_oc_module():
     pass
 
 
 CONTEXT_SETTINGS = dict(max_content_width=120)
+
+command_help = """
+    get all windows boot time and data_source.
+
+    Example: poetry run python main.py openshift-oc-module oc-get-windows-boot-time"""
+
+
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+def oc_get_windows_boot_time():
+    # Execute the command
+    create_debug_pod()
+    command = ('oc get vmis -o json | jq -r \'.items[] | select(.metadata.name | startswith("win")) | '
+               '.status.interfaces[0].ipAddress\' | xargs -I {} oc exec -i my-debug-pod-automation -- /bin/bash -c "echo {}; '
+               'sshpass -p \'Heslo123\' ssh -o StrictHostKeyChecking=no Administrator@{} \'systeminfo\' | grep \'Boot '
+               'Time\'"')
+    execute_local_linux_command_base(command)
+    delete_debug_pod()
+
 
 command_help = """
     get templates and data_source.
@@ -97,6 +130,7 @@ def oc_create_vm_golden_image_range(name, template, data_source, cloud_user_pass
         if running:
             click.echo(run_virtctl(['start', VM_NAME]))
             time.sleep(sleep)
+
 
 command_help: str = """
     Attach or detach pvc in the given range to VM.
