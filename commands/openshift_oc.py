@@ -30,6 +30,40 @@ CONTEXT_SETTINGS = dict(max_content_width=120)
 
 command_help = """
                 Clone range of DV fom a singe DV.
+                Example: poetry run python main.py openshift-oc-module oc-clone-vm --start 2 --end 2 --prefix win10 
+                --namespace default --sleep 0
+                """
+
+
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--prefix', help=click.style('Prefix for PVC clone', fg='magenta'))
+@click.option('--namespace', help=click.style('Namespace for PVC clone', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for PVC clone', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for PVC clone', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between clones', fg='magenta'))
+def oc_clone_vm(prefix, namespace, start, end, sleep):
+    template = files_access.load_template("utilities/manifests/clone-vm.json")
+    for i in range(start, end + 1):
+        VM_NAME = f'{prefix}-{i}'
+
+        template_str = json.dumps(template)
+        modified_template = template_str.replace("{{VM_NAME}}", VM_NAME)
+        modified_template = json.loads(modified_template)
+
+        template_str = json.dumps(modified_template)
+        modified_template = template_str.replace("{{NAMESPACE}}", namespace)
+        modified_template = json.loads(modified_template)
+
+        command = f"echo '{json.dumps(modified_template)}' | oc create -f -"
+        execute_local_linux_command_base(command)
+
+        command = f"oc wait --for=condition=Running VirtualMachine/{VM_NAME}"
+        execute_local_linux_command_base(command)
+
+        time.sleep(sleep)
+
+command_help = """
+                Clone range of DV fom a singe DV.
                 Example: poetry run python main.py openshift-oc-module oc-clone-pvc --start 2 --end 2 --source
                 win10-1 --prefix win10 --namespace default --sleep 0
                 """
