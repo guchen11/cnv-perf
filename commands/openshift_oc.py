@@ -29,6 +29,46 @@ def openshift_oc_module():
 CONTEXT_SETTINGS = dict(max_content_width=120)
 
 command_help = """
+                Clone range of DV fom a singe DV.
+                Example: poetry run python main.py openshift-oc-module oc-clone-pvc --start 2 --end 2 --source
+                win10-1 --prefix win10 --namespace default --sleep 0
+                """
+
+
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--prefix', help=click.style('Prefix for PVC clone', fg='magenta'))
+@click.option('--source', help=click.style('pvc source for PVC clone', fg='magenta'))
+@click.option('--namespace', help=click.style('Namespace for PVC clone', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for PVC clone', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for PVC clone', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between clones', fg='magenta'))
+def oc_clone_pvc(prefix, source, namespace, start, end, sleep):
+    template = files_access.load_template("utilities/manifests/clone-pvc.json")
+    for i in range(start, end + 1):
+        PVC_NAME = f'{prefix}-{i}'
+
+        template_str = json.dumps(template)
+        modified_template = template_str.replace("{{PVC_NAME}}", PVC_NAME)
+        modified_template = json.loads(modified_template)
+
+        template_str = json.dumps(modified_template)
+        modified_template = template_str.replace("{{PVC_SOURCE}}", source)
+        modified_template = json.loads(modified_template)
+
+        template_str = json.dumps(modified_template)
+        modified_template = template_str.replace("{{namespace}}", namespace)
+        modified_template = json.loads(modified_template)
+
+        command = f"echo '{json.dumps(modified_template)}' | oc create -n {namespace} -f -"
+        execute_local_linux_command_base(command)
+
+        command = f"oc wait --for=condition=Ready datavolume/{PVC_NAME}"
+        execute_local_linux_command_base(command)
+
+        time.sleep(sleep)
+
+
+command_help = """
     get all windows boot time and data_source.
 
     Example: poetry run python main.py openshift-oc-module oc-get-windows-boot-time"""
