@@ -1,0 +1,169 @@
+{
+  "apiVersion": "kubevirt.io/v1",
+  "kind": "VirtualMachine",
+  "metadata": {
+    "annotations": {
+      "kubevirt.io/latest-observed-api-version": "v1",
+      "kubevirt.io/storage-observed-api-version": "v1",
+      "vm.kubevirt.io/validations": "[\n  {\n    \"name\": \"minimal-required-memory\",\n    \"path\": \"jsonpath::.spec.domain.memory.guest\",\n    \"rule\": \"integer\",\n    \"message\": \"This VM requires more memory.\",\n    \"min\": 2147483648\n  },\n  {\n    \"name\": \"windows-virtio-bus\",\n    \"path\": \"jsonpath::.spec.domain.devices.disks[*].disk.bus\",\n    \"valid\": \"jsonpath::.spec.domain.devices.disks[*].disk.bus\",\n    \"rule\": \"enum\",\n    \"message\": \"virtio disk bus type has better performance, install virtio drivers in VM and change bus type\",\n    \"values\": [\"virtio\"],\n    \"justWarning\": true\n  },\n  {\n    \"name\": \"windows-disk-bus\",\n    \"path\": \"jsonpath::.spec.domain.devices.disks[*].disk.bus\",\n    \"valid\": \"jsonpath::.spec.domain.devices.disks[*].disk.bus\",\n    \"rule\": \"enum\",\n    \"message\": \"disk bus has to be either virtio or sata or scsi\",\n    \"values\": [\"virtio\", \"sata\", \"scsi\"]\n  },\n  {\n    \"name\": \"windows-cd-bus\",\n    \"path\": \"jsonpath::.spec.domain.devices.disks[*].cdrom.bus\",\n    \"valid\": \"jsonpath::.spec.domain.devices.disks[*].cdrom.bus\",\n    \"rule\": \"enum\",\n    \"message\": \"cd bus has to be sata\",\n    \"values\": [\"sata\"]\n  }\n]\n"
+    },
+    "name": "{{VM_NAME}}",
+    "namespace": "{{NAMESPACE}}",
+    "labels": {
+      "app": "{{VM_NAME}}",
+      "vm.kubevirt.io/template": "windows10-desktop-large",
+      "vm.kubevirt.io/template.namespace": "openshift",
+      "vm.kubevirt.io/template.revision": "1",
+      "vm.kubevirt.io/template.version": "v0.26.0"
+    }
+  },
+  "spec": {
+    "dataVolumeTemplates": [
+      {
+        "apiVersion": "cdi.kubevirt.io/v1beta1",
+        "kind": "DataVolume",
+        "metadata": {
+          "name": "{{VM_NAME}}"
+        },
+        "spec": {
+          "source": {
+            "pvc": {
+              "namespace": "{{NAMESPACE}}",
+              "name": "cloned-pvc"
+            }
+          },
+          "pvc": {
+            "accessModes": [
+              "ReadWriteOnce"
+            ],
+            "resources": {
+              "requests": {
+                "storage": "70Gi"
+              }
+            },
+            "volumeMode": "Block"
+          }
+        }
+      }
+    ],
+    "running": true,
+    "template": {
+      "metadata": {
+        "annotations": {
+          "vm.kubevirt.io/flavor": "large",
+          "vm.kubevirt.io/os": "windows10",
+          "vm.kubevirt.io/workload": "desktop"
+        },
+        "labels": {
+          "kubevirt.io/domain": "{{VM_NAME}}",
+          "kubevirt.io/size": "large"
+        }
+      },
+      "spec": {
+        "architecture": "amd64",
+        "domain": {
+          "clock": {
+            "timer": {
+              "hpet": {
+                "present": false
+              },
+              "hyperv": {},
+              "pit": {
+                "tickPolicy": "delay"
+              },
+              "rtc": {
+                "tickPolicy": "catchup"
+              }
+            },
+            "utc": {}
+          },
+          "cpu": {
+            "cores": 1,
+            "sockets": 2,
+            "threads": 1
+          },
+          "devices": {
+            "disks": [
+              {
+                "disk": {
+                  "bus": "sata"
+                },
+                "name": "rootdisk"
+              },
+              {
+                "cdrom": {
+                  "bus": "sata"
+                },
+                "name": "windows-drivers-disk"
+              }
+            ],
+            "inputs": [
+              {
+                "bus": "usb",
+                "name": "tablet",
+                "type": "tablet"
+              }
+            ],
+            "interfaces": [
+              {
+                "masquerade": {},
+                "model": "e1000e",
+                "name": "default"
+              }
+            ]
+          },
+          "features": {
+            "acpi": {},
+            "apic": {},
+            "hyperv": {
+              "reenlightenment": {},
+              "ipi": {},
+              "synic": {},
+              "synictimer": {
+                "direct": {}
+              },
+              "spinlocks": {
+                "spinlocks": 8191
+              },
+              "reset": {},
+              "relaxed": {},
+              "vpindex": {},
+              "runtime": {},
+              "tlbflush": {},
+              "frequencies": {},
+              "vapic": {}
+            }
+          },
+          "machine": {
+            "type": "pc-q35-rhel9.2.0"
+          },
+          "memory": {
+            "guest": "8Gi"
+          },
+          "resources": {}
+        },
+        "networks": [
+          {
+            "name": "default",
+            "pod": {}
+          }
+        ],
+        "terminationGracePeriodSeconds": 3600,
+        "volumes": [
+          {
+            "dataVolume": {
+              "name": "{{VM_NAME}}"
+            },
+            "name": "rootdisk"
+          },
+          {
+            "containerDisk": {
+              "image": "registry.redhat.io/container-native-virtualization/virtio-win-rhel9@sha256:aff867adb2b9f6a82b8a6047e415a961a90ca63a196c21d8446cd51aa3265aab"
+            },
+            "name": "windows-drivers-disk"
+          }
+        ]
+      }
+    }
+  }
+}
