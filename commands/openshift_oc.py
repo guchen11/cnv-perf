@@ -62,6 +62,7 @@ def oc_clone_vm(prefix, namespace, start, end, sleep):
 
         time.sleep(sleep)
 
+
 command_help = """
                 Clone range of DV fom a singe DV.
                 Example: poetry run python main.py openshift-oc-module oc-clone-pvc --start 2 --end 2 --source
@@ -103,7 +104,7 @@ def oc_clone_pvc(prefix, source, namespace, start, end, sleep):
 
 
 command_help = """
-    get all windows boot time and data_source.
+    get all windows boot time.
 
     Example: poetry run python main.py openshift-oc-module oc-get-windows-boot-time"""
 
@@ -116,6 +117,25 @@ def oc_get_windows_boot_time():
                '.status.interfaces[0].ipAddress\' | xargs -I {} oc exec -i my-debug-pod-automation -- /bin/bash -c "echo {}; '
                'sshpass -p \'Heslo123\' ssh -o StrictHostKeyChecking=no Administrator@{} \'systeminfo\' | grep \'Boot '
                'Time\'"')
+    execute_local_linux_command_base(command)
+    delete_debug_pod()
+
+
+command_help = """
+    get all windows critical events from last 48 hoers.
+
+    Example: poetry run python main.py openshift-oc-module oc-get-windows-boot-time"""
+
+
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+def oc_get_windows_critical_events():
+    # Execute the command
+    create_debug_pod()
+    command = ('oc get vmis -o json | jq -r \'.items[] | select(.metadata.name | startswith("win")) | '
+               '.status.interfaces[0].ipAddress\' | xargs -I {} bash -c \'ip="{}"; echo "Processing $ip"; oc exec -i '
+               'my-debug-pod-automation -- /bin/bash -c "sshpass -p \'\\\'\'Heslo123\'\\\'\' ssh -o '
+               'StrictHostKeyChecking=no Administrator@$ip \"wevtutil qe System /q:\\\"*[System[Level=1]]]\\\" '
+               '/f:text\""\'')
     execute_local_linux_command_base(command)
     delete_debug_pod()
 
