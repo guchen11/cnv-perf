@@ -2,44 +2,38 @@
   "apiVersion": "v1",
   "kind": "Pod",
   "metadata": {
+    "name": "my-debug-pod-automation",
+    "namespace": "default",
     "annotations": {
       "debug.openshift.io/source-container": "container-00",
       "debug.openshift.io/source-resource": "/v1, Resource=nodes/amd01"
-    },
-    "creationTimestamp": "2024-06-17T15:50:29Z",
-    "name": "my-debug-pod-automation",
-    "namespace": "default",
-    "resourceVersion": "20513239",
-    "uid": "23ab24b8-3f51-4b8c-b4cd-6faad3ef5c57"
+    }
   },
   "spec": {
     "containers": [
       {
+        "name": "container-00",
+        "image": "quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:b60f69db97409a6f39c935f9af5a4780addd46eaeaf0ae6bebce5312ec252edd",
         "command": [
           "/bin/sh"
         ],
-        "env": null,
-        "image": "quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:b60f69db97409a6f39c935f9af5a4780addd46eaeaf0ae6bebce5312ec252edd",
         "imagePullPolicy": "IfNotPresent",
-        "name": "container-00",
+        "stdin": true,
+        "stdinOnce": true,
+        "tty": true,
         "resources": {},
         "securityContext": {
           "privileged": true,
           "runAsUser": 0
         },
-        "stdin": true,
-        "stdinOnce": true,
-        "terminationMessagePath": "/dev/termination-log",
-        "terminationMessagePolicy": "File",
-        "tty": true,
         "volumeMounts": [
           {
-            "mountPath": "/host",
-            "name": "host"
+            "name": "host",
+            "mountPath": "/host"
           },
           {
+            "name": "kube-api-access",
             "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
-            "name": "kube-api-access-n9wzt",
             "readOnly": true
           }
         ]
@@ -55,136 +49,78 @@
     "priorityClassName": "openshift-user-critical",
     "restartPolicy": "Never",
     "schedulerName": "default-scheduler",
-    "securityContext": {},
-    "serviceAccount": "default",
     "serviceAccountName": "default",
     "terminationGracePeriodSeconds": 30,
     "tolerations": [
       {
-        "effect": "NoExecute",
         "key": "node.kubernetes.io/not-ready",
         "operator": "Exists",
+        "effect": "NoExecute",
         "tolerationSeconds": 300
       },
       {
-        "effect": "NoExecute",
         "key": "node.kubernetes.io/unreachable",
         "operator": "Exists",
+        "effect": "NoExecute",
         "tolerationSeconds": 300
       }
     ],
     "volumes": [
       {
+        "name": "host",
         "hostPath": {
           "path": "/",
           "type": "Directory"
-        },
-        "name": "host"
+        }
       },
       {
-        "name": "kube-api-access-n9wzt",
+        "name": "kube-api-access",
         "projected": {
-          "defaultMode": 420,
           "sources": [
             {
               "serviceAccountToken": {
-                "expirationSeconds": 3607,
-                "path": "token"
+                "path": "token",
+                "expirationSeconds": 3607
               }
             },
             {
               "configMap": {
+                "name": "kube-root-ca.crt",
                 "items": [
                   {
                     "key": "ca.crt",
                     "path": "ca.crt"
                   }
-                ],
-                "name": "kube-root-ca.crt"
+                ]
               }
             },
             {
               "downwardAPI": {
                 "items": [
                   {
+                    "path": "namespace",
                     "fieldRef": {
                       "apiVersion": "v1",
                       "fieldPath": "metadata.namespace"
-                    },
-                    "path": "namespace"
+                    }
                   }
                 ]
               }
             },
             {
               "configMap": {
+                "name": "openshift-service-ca.crt",
                 "items": [
                   {
                     "key": "service-ca.crt",
                     "path": "service-ca.crt"
                   }
-                ],
-                "name": "openshift-service-ca.crt"
+                ]
               }
             }
           ]
         }
       }
     ]
-  },
-  "status": {
-    "conditions": [
-      {
-        "lastProbeTime": null,
-        "lastTransitionTime": "2024-06-17T15:50:29Z",
-        "status": "True",
-        "type": "Initialized"
-      },
-      {
-        "lastProbeTime": null,
-        "lastTransitionTime": "2024-06-17T15:50:30Z",
-        "status": "True",
-        "type": "Ready"
-      },
-      {
-        "lastProbeTime": null,
-        "lastTransitionTime": "2024-06-17T15:50:30Z",
-        "status": "True",
-        "type": "ContainersReady"
-      },
-      {
-        "lastProbeTime": null,
-        "lastTransitionTime": "2024-06-17T15:50:29Z",
-        "status": "True",
-        "type": "PodScheduled"
-      }
-    ],
-    "containerStatuses": [
-      {
-        "containerID": "cri-o://47ae1a44df64ab6fd0b45ac8843968f2a15bf0db15766e86a20bcaf383454b16",
-        "image": "quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:b60f69db97409a6f39c935f9af5a4780addd46eaeaf0ae6bebce5312ec252edd",
-        "imageID": "quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:b60f69db97409a6f39c935f9af5a4780addd46eaeaf0ae6bebce5312ec252edd",
-        "lastState": {},
-        "name": "container-00",
-        "ready": true,
-        "restartCount": 0,
-        "started": true,
-        "state": {
-          "running": {
-            "startedAt": "2024-06-17T15:50:29Z"
-          }
-        }
-      }
-    ],
-    "hostIP": "10.185.52.39",
-    "phase": "Running",
-    "podIP": "10.185.52.39",
-    "podIPs": [
-      {
-        "ip": "10.185.52.39"
-      }
-    ],
-    "qosClass": "BestEffort",
-    "startTime": "2024-06-17T15:50:29Z"
   }
 }
