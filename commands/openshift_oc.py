@@ -104,6 +104,27 @@ def oc_clone_pvc(prefix, source, namespace, start, end, sleep):
 
 
 command_help = """
+    delete all windows events.
+
+    Example: poetry run python main.py openshift-oc-module oc-delete-windows-events"""
+
+
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+def oc_delete_windows_events():
+    # Execute the command
+    create_debug_pod()
+    command = ('oc get vmis -o json | jq -r \'.items[] | select(.metadata.name | startswith("win")) | '
+               '.status.interfaces[0].ipAddress\' | xargs -I {} oc exec -i my-debug-pod-automation -- /bin/bash -c "echo {}; '
+               'sshpass -p \'Heslo123\' ssh -o StrictHostKeyChecking=no Administrator@{} wevtutil cl Application "')
+    execute_local_linux_command_base(command)
+    command = ('oc get vmis -o json | jq -r \'.items[] | select(.metadata.name | startswith("win")) | '
+               '.status.interfaces[0].ipAddress\' | xargs -I {} oc exec -i my-debug-pod-automation -- /bin/bash -c "echo {}; '
+               'sshpass -p \'Heslo123\' ssh -o StrictHostKeyChecking=no Administrator@{} wevtutil cl System "')
+    execute_local_linux_command_base(command)
+    delete_debug_pod()
+
+
+command_help = """
     get all windows boot time.
 
     Example: poetry run python main.py openshift-oc-module oc-get-windows-boot-time"""
@@ -122,20 +143,34 @@ def oc_get_windows_boot_time():
 
 
 command_help = """
-    get all windows critical events from last 48 hoers.
+    get all windows system events from last 48 hoers.
 
-    Example: poetry run python main.py openshift-oc-module oc-get-windows-boot-time"""
+    Example: poetry run python main.py openshift-oc-module oc-get-windows-system-events"""
 
 
 @openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
-def oc_get_windows_critical_events():
+def oc_get_windows_system_events():
     # Execute the command
     create_debug_pod()
     command = ('oc get vmis -o json | jq -r \'.items[] | select(.metadata.name | startswith("win")) | '
-               '.status.interfaces[0].ipAddress\' | xargs -I {} bash -c \'ip="{}"; echo "Processing $ip"; oc exec -i '
-               'my-debug-pod-automation -- /bin/bash -c "sshpass -p \'\\\'\'Heslo123\'\\\'\' ssh -o '
-               'StrictHostKeyChecking=no Administrator@$ip \"wevtutil qe System /q:\\\"*[System[Level=1]]]\\\" '
-               '/f:text\""\'')
+               '.status.interfaces[0].ipAddress\' | xargs -I {} -P 100 oc exec -i my-debug-pod-automation -- /bin/bash -c "echo {}; '
+               'sshpass -p \'Heslo123\' ssh -o StrictHostKeyChecking=no Administrator@{} wevtutil qe System /f:text "')
+    execute_local_linux_command_base(command)
+    delete_debug_pod()
+
+command_help = """
+    get all windows system application from last 48 hoers.
+
+    Example: poetry run python main.py openshift-oc-module oc-get-windows-application-events"""
+
+
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+def oc_get_windows_application_events():
+    # Execute the command
+    create_debug_pod()
+    command = ('oc get vmis -o json | jq -r \'.items[] | select(.metadata.name | startswith("win")) | '
+               '.status.interfaces[0].ipAddress\' | xargs -I {} oc exec -i my-debug-pod-automation -- /bin/bash -c "echo {}; '
+               'sshpass -p \'Heslo123\' ssh -o StrictHostKeyChecking=no Administrator@{} wevtutil qe Application /f:text "')
     execute_local_linux_command_base(command)
     delete_debug_pod()
 
