@@ -25,15 +25,6 @@
           "ipv6": {
             "enabled": false
           }
-        },
-        {
-          "name": "enp33s0f0.{{index}}",
-          "type": "vlan",
-          "state": "up",
-          "vlan": {
-            "base-iface": "enp33s0f0",
-            "id": "{{index}}"
-          }
         }
       ]
     },

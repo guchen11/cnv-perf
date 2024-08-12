@@ -27,11 +27,11 @@
           }
         },
         {
-          "name": "enp33s0f0.{{index}}",
+          "name": "{{base_interface}}.{{index}}",
           "type": "vlan",
           "state": "up",
           "vlan": {
-            "base-iface": "enp33s0f0",
+            "base-iface": "{{base_interface}}",
             "id": "{{index}}"
           }
         }
