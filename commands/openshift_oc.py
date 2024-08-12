@@ -158,6 +158,7 @@ def oc_get_windows_system_events():
     execute_local_linux_command_base(command)
     delete_debug_pod()
 
+
 command_help = """
     get all windows system application from last 48 hoers.
 
@@ -323,9 +324,11 @@ def set_pvc_interface(vm_name, namespace, interface, prefix, start, end, sleep):
 
 command_help: str = """
     Create or delete basic NNCPs on each worker node 
-
-    Example: create-delete-nncp --op create --start 1 --end 1 --sleep 0 --vlan True
-    This will create NodeNetworkConfigurationPolicy from 'br-scale-1' to 'br-scale-2'.
+    
+    If need to connect to default NIC the check the ethernet on the workers with nmcli con show --active.
+    
+    Example: create-delete-nncp --op create --start 1 --end 1 --sleep 0 --vlan True --base_interface ens1f0
+    This will create NodeNetworkConfigurationPolicy from 'br-scale-1' to 'br-scale-2' connected to base interface.
     """
 
 
@@ -335,14 +338,19 @@ command_help: str = """
 @click.option('--end', type=int, help=click.style('End index for NNCPs', fg='magenta'))
 @click.option('--sleep', type=int, help=click.style('sleep between NNCPs attach', fg='magenta'))
 @click.option('--vlan', type=bool, default=False, help=click.style('True if added vlan connected to node'))
-def create_delete_nncp(op, start, end, sleep, vlan):
+@click.option('--base_interface', help=click.style('base interface for NNCPs VLAN', fg='magenta'))
+def create_delete_nncp(op, start, end, sleep, vlan, base_interface):
     for i in range(start, end + 1):
-        if (vlan):
+        if vlan:
             template = files_access.load_template("utilities/manifests/NodeNetworkConfigurationPolicyWithVLAN.json")
+            template_str = json.dumps(template)
+            modified_template = template_str.replace("{{index}}", f'{i}')
+            modified_template = modified_template.replace("{{base_interface}}", f'{base_interface}')
         else:
             template = files_access.load_template("utilities/manifests/NodeNetworkConfigurationPolicy.json")
-        template_str = json.dumps(template)
-        modified_template = template_str.replace("{{index}}", f'{i}')
+            template_str = json.dumps(template)
+            modified_template = template_str.replace("{{index}}", f'{i}')
+
         command = f"echo '{modified_template}' | oc '{op}' -f -"
         execute_local_linux_command_base(command)
         time.sleep(sleep)
@@ -360,7 +368,10 @@ def create_delete_nncp(op, start, end, sleep, vlan):
             SuccessfullyConfigured = execute_local_linux_command_base(command)
             print(f"SuccessfullyConfigured: '{SuccessfullyConfigured}', end: 0")
             time.sleep(2)
-
+    command = ("oc get nodes -l node-role.kubernetes.io/worker -o name | xargs -I{} sh -c 'echo -n \"{}: \"; oc "
+               "describe {} | awk \"/Allocated resources/,/Events:/ {print}\" | grep -c "
+               "\"bridge.network.kubevirt.io/br-scale-\"'")
+    execute_local_linux_command_base(command)
 
 command_help: str = """
     Empty prometheus data base
