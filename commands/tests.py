@@ -14,9 +14,9 @@ def tests_module():
 command_help = """
     Create vm range from golden image.
 
-    Example: poetry run python main.py tests-module create-vm_golden-image-with-ssh-publickey-and-test --prefix fedora-server-large 
+    Example: poetry run python main.py tests-module create-vm-golden-image-with-ssh-publickey-and-test --prefix fedora-server-large 
     --template fedora-server-large --data_source fedora --sleep 0 --user fedora --namespace scale-test --start 1 --end 10
-    --startVM False --isAlive False"""
+    --start_vm False --is_alive False"""
 
 
 @tests_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
@@ -36,12 +36,12 @@ def create_vm_golden_image_with_ssh_publickey_and_test(prefix, template, data_so
     print("CREATE VMS")
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
     execute_local_linux_command_base(
-        f"poetry run python main.py openshift-oc-module oc-create-vm-golden-image-range --name {prefix} --template {template}  --cloud_user_password password --data_source {data_source} --namespace {namespace} --start {start} --end {end} --sleep {sleep}")
+        f"poetry run python main.py openshift-oc-module oc-create-vm-golden-image-range --name {prefix} --template {template}  --cloud_user_password password --data_source {data_source} --namespace {namespace} --start {start} --end {end} --sleep 0")
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
     print("PATCH TO VMS PUBLIC KEY")
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
     execute_local_linux_command_base(
-        f"poetry run python main.py openshift-oc-module patch-ssh-publickey-vm --namespace {namespace} --prefix {prefix}- --start {start} --end {end} --sleep {sleep}")
+        f"poetry run python main.py openshift-oc-module patch-ssh-publickey-vm --namespace {namespace} --prefix {prefix}- --start {start} --end {end} --sleep 0")
     if (start_vm):
         print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
         print("START VMS")
@@ -54,7 +54,7 @@ def create_vm_golden_image_with_ssh_publickey_and_test(prefix, template, data_so
         print("!!!!!!!!!!!!!!!!!!!!!!!!!!!)")
         time.sleep(10)
         execute_local_linux_command_base(
-            f"poetry run python main.py virtctl-module check-vms-ssh-alive --prefix {prefix}- --username={user} --start {start} --end {end} --sleep {sleep} | grep -c {user}  ")
+            f"poetry run python main.py virtctl-module check-vms-ssh-alive --prefix {prefix}- --username={user} --start {start} --end {end} --sleep 0 | grep -c testOSisAlive ")
 
 def thread_function(name):
     logging.info("Thread %s: starting", name)

@@ -26,9 +26,12 @@ def run_virtctl(args):
         # Handle the error
         print("Fatal Error:", e)
 
+
 def clear_known_hosts():
     known_hosts_path = os.path.expanduser("~/.ssh/known_hosts")
     subprocess.run(['ssh-keygen', '-R', '*', '-f', known_hosts_path])
+
+
 @click.group()
 def virtctl_module():
     pass
@@ -44,10 +47,10 @@ command_help: str = """
 
 
 @virtctl_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
-@click.option('--prefix',help=click.style('Prefix for VM names', fg='magenta'))
-@click.option('--start', type=int,help=click.style('Start index for VMs', fg='magenta'))
-@click.option('--end', type=int,help=click.style('End index for VMs', fg='magenta'))
-@click.option('--sleep', type=int,help=click.style('sleep between VMs', fg='magenta'))
+@click.option('--prefix', help=click.style('Prefix for VM names', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for VMs', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for VMs', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between VMs', fg='magenta'))
 def stop_vms(prefix, start, end, sleep):
     for i in range(start, end + 1):
         vm_name = f'{prefix}{i}'
@@ -65,10 +68,10 @@ command_help: str = """
 
 
 @virtctl_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
-@click.option('--prefix',help=click.style('Prefix for VM names', fg='magenta'))
-@click.option('--start', type=int,help=click.style('Start index for VMs', fg='magenta'))
-@click.option('--end', type=int,help=click.style('End index for VMs', fg='magenta'))
-@click.option('--sleep', type=int,help=click.style('sleep between VMs', fg='magenta'))
+@click.option('--prefix', help=click.style('Prefix for VM names', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for VMs', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for VMs', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between VMs', fg='magenta'))
 def start_vms(prefix, start, end, sleep):
     for i in range(start, end + 1):
         vm_name = f'{prefix}{i}'
@@ -86,8 +89,8 @@ command_help: str = """
 
 
 @virtctl_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
-@click.option('--node',help=click.style('Node t migrate', fg='magenta'))
-@click.option('--sleep', type=int,help=click.style('sleep between VMs', fg='magenta'))
+@click.option('--node', help=click.style('Node t migrate', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between VMs', fg='magenta'))
 def migrate_node(node, sleep):
     vms_list = get_vms_on_node(node)
     for vm in vms_list:
@@ -105,11 +108,11 @@ command_help: str = """
 
 
 @virtctl_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
-@click.option('--vm_name',help=click.style('VM names', fg='magenta'))
-@click.option('--prefix',help=click.style('Prefix for PVC names', fg='magenta'))
-@click.option('--start', type=int,help=click.style('Start index for PVC', fg='magenta'))
-@click.option('--end', type=int,help=click.style('End index for PVC', fg='magenta'))
-@click.option('--sleep', type=int,help=click.style('sleep between PVC attach', fg='magenta'))
+@click.option('--vm_name', help=click.style('VM names', fg='magenta'))
+@click.option('--prefix', help=click.style('Prefix for PVC names', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for PVC', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for PVC', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between PVC attach', fg='magenta'))
 def hotplug_attach_pcv_to_vm(vm_name, prefix, start, end, sleep):
     error_result = 0
     start_time = time.time()
@@ -142,11 +145,11 @@ command_help: str = """
 
 
 @virtctl_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
-@click.option('--vm_name',help=click.style('VM names', fg='magenta'))
-@click.option('--prefix',help=click.style('Prefix for PVC names', fg='magenta'))
-@click.option('--start', type=int,help=click.style('Start index for PVC', fg='magenta'))
-@click.option('--end', type=int,help=click.style('End index for PVC', fg='magenta'))
-@click.option('--sleep', type=int,help=click.style('sleep between PVC attach', fg='magenta'))
+@click.option('--vm_name', help=click.style('VM names', fg='magenta'))
+@click.option('--prefix', help=click.style('Prefix for PVC names', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for PVC', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for PVC', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between PVC attach', fg='magenta'))
 def hotplug_detach_pcv_to_vm(vm_name, prefix, start, end, sleep):
     error_result = 0
     start_time = time.time()
@@ -155,9 +158,9 @@ def hotplug_detach_pcv_to_vm(vm_name, prefix, start, end, sleep):
         return_code = run_virtctl(['removevolume', vm_name, '--volume-name=' + pvc_name, '--persist'])
         if "error" in return_code:
             error_result = error_result + 1
-#        while "error" in return_code != 0:
-#            time.sleep(2)
-#            return_code = run_virtctl(['removevolume', vm_name, '--volume-name=' + pvc_name, '--persist'])
+        #        while "error" in return_code != 0:
+        #            time.sleep(2)
+        #            return_code = run_virtctl(['removevolume', vm_name, '--volume-name=' + pvc_name, '--persist'])
         time.sleep(sleep)
     print(f'Out of {end + 1 - start} actions {error_result} have failed')
     end_time = time.time()
@@ -174,8 +177,8 @@ command_help: str = """
 
 
 @virtctl_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
-@click.option('--vm_name',help=click.style('VM names', fg='magenta'))
-@click.option('--final_attached_disk', type=int,help=click.style('expected final disk', fg='magenta'))
+@click.option('--vm_name', help=click.style('VM names', fg='magenta'))
+@click.option('--final_attached_disk', type=int, help=click.style('expected final disk', fg='magenta'))
 def test_vm_start_time(vm_name, final_attached_disk):
     virt_handler_logs_start = execute_local_linux_command_base(
         "oc get po -n openshift-cnv | grep \"virt-handler-\" |  awk '{print $1}' |  xargs -I index sh -c 'oc logs index -c virt-handler -n openshift-cnv | grep -c \"Synchronizing the VirtualMachineInstance failed.\"'")
@@ -207,16 +210,18 @@ command_help: str = """
 
 
 @virtctl_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
-@click.option('--prefix',help=click.style('Prefix for VM names', fg='magenta'))
-@click.option('--username',help=click.style('username of VM', fg='magenta'))
-@click.option('--start', type=int,help=click.style('Start index for VMs', fg='magenta'))
-@click.option('--end', type=int,help=click.style('End index for VMs', fg='magenta'))
-@click.option('--sleep', type=int,help=click.style('sleep between VMs', fg='magenta'))
+@click.option('--prefix', help=click.style('Prefix for VM names', fg='magenta'))
+@click.option('--username', help=click.style('username of VM', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for VMs', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for VMs', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between VMs', fg='magenta'))
 def check_vms_ssh_alive(prefix, username, start, end, sleep):
     for i in range(start, end + 1):
         vm_name = f'{prefix}{i}'
-        execute_local_linux_command_base(f"virtctl ssh {vm_name} --username={username} --command='cat /etc/redhat-release' --local-ssh-opts='-o StrictHostKeyChecking=no'")
+        execute_local_linux_command_base(
+            f"virtctl ssh --local-ssh=true {vm_name} --username={username} --command='echo testOSisAlive' --local-ssh-opts='-o StrictHostKeyChecking=no'")
         time.sleep(sleep)
+
 
 command_help: str = """
     execute command on VMS range.
@@ -227,17 +232,19 @@ command_help: str = """
 
 
 @virtctl_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
-@click.option('--command',help=click.style('command executed on the VMS', fg='magenta'))
-@click.option('--prefix',help=click.style('Prefix for VM names', fg='magenta'))
-@click.option('--username',help=click.style('username of VM', fg='magenta'))
-@click.option('--start', type=int,help=click.style('Start index for VMs', fg='magenta'))
-@click.option('--end', type=int,help=click.style('End index for VMs', fg='magenta'))
-@click.option('--sleep', type=int,help=click.style('sleep between VMs', fg='magenta'))
+@click.option('--command', help=click.style('command executed on the VMS', fg='magenta'))
+@click.option('--prefix', help=click.style('Prefix for VM names', fg='magenta'))
+@click.option('--username', help=click.style('username of VM', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for VMs', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for VMs', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between VMs', fg='magenta'))
 def execute_command_vms(command, prefix, username, start, end, sleep):
     for i in range(start, end + 1):
         vm_name = f'{prefix}{i}'
-        execute_local_linux_command_base(f"virtctl ssh {vm_name} --username={username} --command='{command}' --local-ssh-opts='-o StrictHostKeyChecking=no'")
+        execute_local_linux_command_base(
+            f"virtctl ssh --local-ssh=true {vm_name} --username={username} --command='{command}' --local-ssh-opts='-o StrictHostKeyChecking=no'")
         time.sleep(sleep)
+
 
 command_help: str = """
     execute command on VMS range concurrent.
@@ -246,13 +253,14 @@ command_help: str = """
     This will execute command VMs from 'fedora-test-1' to 'fedora-test-1'.
     """
 
+
 @virtctl_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
-@click.option('--command',help=click.style('command to sent to the VM', fg='magenta'))
-@click.option('--prefix',help=click.style('Prefix for VM names', fg='magenta'))
-@click.option('--username',help=click.style('username of VM', fg='magenta'))
-@click.option('--start', type=int,help=click.style('Start index for VMs', fg='magenta'))
-@click.option('--end', type=int,help=click.style('End index for VMs', fg='magenta'))
-@click.option('--sleep', type=int,help=click.style('sleep between VMs', fg='magenta'))
+@click.option('--command', help=click.style('command to sent to the VM', fg='magenta'))
+@click.option('--prefix', help=click.style('Prefix for VM names', fg='magenta'))
+@click.option('--username', help=click.style('username of VM', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for VMs', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for VMs', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between VMs', fg='magenta'))
 def execute_command_vms_concurrent(command, prefix, username, start, end, sleep):
     success_count = 0
 
@@ -262,7 +270,7 @@ def execute_command_vms_concurrent(command, prefix, username, start, end, sleep)
 
         # Execute the 'whoami' command via SSH
         result = execute_local_linux_command_base(
-            f"virtctl ssh {vm_name} --username={username} --command='{command}' --local-ssh-opts='-o StrictHostKeyChecking=no'"
+            f"virtctl ssh --local-ssh=true {vm_name} --username={username} --command='{command}' --local-ssh-opts='-o StrictHostKeyChecking=no'"
         )
 
     format = "%(asctime)s: %(message)s"
@@ -280,12 +288,13 @@ command_help: str = """
     This will check VMs from 'centos7-test-1' to 'centos7-test-1'.
     """
 
+
 @virtctl_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
-@click.option('--prefix',help=click.style('Prefix for VM names', fg='magenta'))
-@click.option('--username',help=click.style('username of VM', fg='magenta'))
-@click.option('--start', type=int,help=click.style('Start index for VMs', fg='magenta'))
-@click.option('--end', type=int,help=click.style('End index for VMs', fg='magenta'))
-@click.option('--sleep', type=int,help=click.style('sleep between VMs', fg='magenta'))
+@click.option('--prefix', help=click.style('Prefix for VM names', fg='magenta'))
+@click.option('--username', help=click.style('username of VM', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for VMs', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for VMs', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between VMs', fg='magenta'))
 def check_vms_ssh_alive_concurrent(prefix, username, start, end, sleep):
     success_count = 0
 
@@ -295,14 +304,14 @@ def check_vms_ssh_alive_concurrent(prefix, username, start, end, sleep):
 
         # Execute the 'whoami' command via SSH
         result = execute_local_linux_command_base(
-            f"virtctl ssh {vm_name} --username={username} --command='whoami' --local-ssh-opts='-o StrictHostKeyChecking=no'"
+            f"virtctl ssh --local-ssh=true {vm_name} --username={username} --command='echo testOSisAlive' --local-ssh-opts='-o StrictHostKeyChecking=no'"
         )
 
-        if result == username:
+        if result == "testOSisAlive":
             success_count += 1
-            logging.info("Command 'whoami' succeeded on VM %s", vm_name)
+            logging.info("Command 'echo testOSisAlive' succeeded on VM %s", vm_name)
         else:
-            logging.error("Command 'whoami' failed on VM %s", vm_name)
+            logging.error("Command 'echo testOSisAlive' failed on VM %s", vm_name)
 
     format = "%(asctime)s: %(message)s"
     logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
@@ -310,9 +319,16 @@ def check_vms_ssh_alive_concurrent(prefix, username, start, end, sleep):
     with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
         vm_names = [f'{prefix}{i}' for i in range(start, end + 1)]
         executor.map(thread_function, vm_names)
-    logging.info("!!!!!!!!!!!!!!!!!!!!!")
-    logging.info("SSH checks completed. Total successful commands executed: %d", success_count)
-    logging.info("!!!!!!!!!!!!!!!!!!!!!")
+    tested_vms = end + 1 - start
+    if success_count == tested_vms:
+        logging.info("!!!!!!!!!!!!!!!!!!!!!")
+        logging.info("SSH checks passed. Total successful commands executed: %d out of %d", success_count, tested_vms)
+        logging.info("!!!!!!!!!!!!!!!!!!!!!")
+    else:
+        logging.info("!!!!!!!!!!!!!!!!!!!!!")
+        logging.info("SSH checks failed. Total successful commands executed: %d out of %d", success_count, tested_vms)
+        logging.info("!!!!!!!!!!!!!!!!!!!!!")
+
 
 command_help: str = """
     Migrate VMs in the given range.
@@ -326,10 +342,10 @@ command_help: str = """
 
 
 @virtctl_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
-@click.option('--prefix',help=click.style('Prefix for VM names', fg='magenta'))
-@click.option('--start', type=int,help=click.style('Start index for VMs', fg='magenta'))
-@click.option('--end', type=int,help=click.style('End index for VMs', fg='magenta'))
-@click.option('--sleep', type=int,help=click.style('sleep between VMs', fg='magenta'))
+@click.option('--prefix', help=click.style('Prefix for VM names', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for VMs', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for VMs', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between VMs', fg='magenta'))
 def migrate_vms(prefix, start, end, sleep):
     execute_local_linux_command_base_silent("oc delete vmim --all")
     for i in range(start, end + 1):
@@ -338,10 +354,54 @@ def migrate_vms(prefix, start, end, sleep):
         time.sleep(sleep)
         print(output)
 
-    count = (end - start +1 )
+    count = (end - start + 1)
     output = execute_local_linux_command_base_silent("oc get vmim | grep -c Succeeded")
     while int(output) != int(count):
         time.sleep(1)
         output = execute_local_linux_command_base_silent("oc get vmim | grep -c Succeeded")
         print(output)
         print(count)
+
+
+command_help: str = """
+    Migrate VMs in the given range.
+
+    Example: migrate-vms-concurrent --prefix entos7-test- --start 1 --end 5 --sleep 1
+    This will migrate VMs from 'vm-1' to 'vm-5'.
+
+    Batches :
+    for i in {1..1}; do poetry run python main.py virtctl-module migrate-vms --prefix entos7-test- --start 1 --end 100 --sleep 0 ; done
+    """
+
+
+@virtctl_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--prefix', help=click.style('Prefix for VM names', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for VMs', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for VMs', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between VMs', fg='magenta'))
+def migrate_vms_concurrent(prefix, start, end, sleep):
+    execute_local_linux_command_base_silent("oc delete vmim --all")
+    success_count = 0
+
+    def thread_function(vm_name):
+        nonlocal success_count
+        logging.info("Checking VM %s", vm_name)
+
+        # Execute the 'whoami' command via SSH
+        result = run_virtctl(['migrate', vm_name])
+        print(output)
+
+    format = "%(asctime)s: %(message)s"
+    logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+        vm_names = [f'{prefix}{i}' for i in range(start, end + 1)]
+        executor.map(thread_function, vm_names)
+    count = (end - start + 1)
+    output = execute_local_linux_command_base_silent("oc get vmim | grep -c Succeeded")
+    while int(output) != int(count):
+        time.sleep(1)
+        output = execute_local_linux_command_base_silent("oc get vmim | grep -c Succeeded")
+        print(output)
+        print(count)
+
