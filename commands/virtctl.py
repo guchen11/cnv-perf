@@ -37,6 +37,37 @@ def virtctl_module():
     pass
 
 
+def check_vm_ready(op,vm_name):
+    # Define the command to check the Ready condition
+    command = f"oc get VirtualMachine/{vm_name} -o jsonpath='{{.status.printableStatus}}'"
+    print(f"{command}")
+
+    # Record the start time
+    start_time = time.time()
+
+    if op == 'start':
+        vm_condition = 'Running'
+    else:
+        vm_condition = 'Stopped'
+    while True:
+        # Execute the command to get the Ready status
+        result = execute_local_linux_command_base_silent(command)
+
+        if result == f"{vm_condition}":
+            # VM is ready
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            #print(f"VM {vm_name} running state is {result}")
+            #print(f"Time taken: {elapsed_time:.2f} seconds")
+            return float(f"{elapsed_time:.2f}")  # Return elapsed time as float
+        else:
+            #print(f"VM {vm_name} is not ready yet. Checking again...")
+            #print(f"VM {vm_name} running state is {result}")
+            time.sleep(1)
+
+        # Wait for a short period before checking again
+        time.sleep(1)
+
 CONTEXT_SETTINGS = dict(max_content_width=120)
 command_help: str = """
     Stop VMs in the given range.
@@ -60,6 +91,41 @@ def stop_vms(prefix, start, end, sleep):
 
 
 command_help: str = """
+    Stop VMs in the given range.
+
+    Example: stop-vms-concurrent --prefix vm- --start 1 --end 5 --sleep 1
+    This will stop VMs from 'vm-1' to 'vm-5'.
+    """
+
+
+@virtctl_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--prefix', help=click.style('Prefix for VM names', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for VMs', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for VMs', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between VMs', fg='magenta'))
+def stop_vms_concurrent(prefix, start, end, sleep):
+    def thread_function(vm_name):
+        logging.info("Stopping VM %s", vm_name)
+
+        # Execute the 'whoami' command via SSH
+        result = execute_local_linux_command_base(
+            f"virtctl stop {vm_name}"
+        )
+
+    format = "%(asctime)s: %(message)s"
+    logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+        vm_names = [f'{prefix}{i}' for i in range(start, end + 1)]
+        executor.map(thread_function, vm_names)
+
+    for i in range(start, end + 1):
+        vm_name = f"{prefix}{i}"
+        check_vm_ready('stop',vm_name)
+
+
+
+command_help: str = """
     Start VMs in the given range.
 
     Example: start-vms --prefix cirros-vm- --start 1 --end 5 --sleep 1
@@ -78,6 +144,40 @@ def start_vms(prefix, start, end, sleep):
         output = run_virtctl(['start', vm_name])
         time.sleep(sleep)
         print(output)
+
+command_help: str = """
+    Start VMs in the given range.
+
+    Example: poetry run python main.py virtctl-module start-vms-concurrent --prefix cirros-vm- --start 1 --end 5 --sleep 1
+    This will start VMs from 'vm-1' to 'vm-5'.
+    """
+
+
+@virtctl_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.option('--prefix', help=click.style('Prefix for VM names', fg='magenta'))
+@click.option('--start', type=int, help=click.style('Start index for VMs', fg='magenta'))
+@click.option('--end', type=int, help=click.style('End index for VMs', fg='magenta'))
+@click.option('--sleep', type=int, help=click.style('sleep between VMs', fg='magenta'))
+def start_vms_concurrent(prefix, start, end, sleep):
+
+    def thread_function(vm_name):
+        logging.info("Starting VM %s", vm_name)
+
+        # Execute the 'whoami' command via SSH
+        result = execute_local_linux_command_base(
+            f"virtctl start {vm_name}"
+        )
+
+    format = "%(asctime)s: %(message)s"
+    logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+        vm_names = [f'{prefix}{i}' for i in range(start, end + 1)]
+        executor.map(thread_function, vm_names)
+
+    for i in range(start, end + 1):
+        vm_name = f"{prefix}{i}"
+        check_vm_ready('start',vm_name)
 
 
 command_help: str = """
@@ -382,6 +482,8 @@ command_help: str = """
 def migrate_vms_concurrent(prefix, start, end, sleep):
     execute_local_linux_command_base_silent("oc delete vmim --all")
     success_count = 0
+    # Record the start time
+    start_time = time.time()
 
     def thread_function(vm_name):
         nonlocal success_count
@@ -404,4 +506,9 @@ def migrate_vms_concurrent(prefix, start, end, sleep):
         output = execute_local_linux_command_base_silent("oc get vmim | grep -c Succeeded")
         print(output)
         print(count)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    elapsed_time_float = float(f"{elapsed_time:.2f}")
+    print(f"Elapsed time {elapsed_time_float}")
+
 
