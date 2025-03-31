@@ -10,7 +10,7 @@
         {
           "name": "br-scale-{{index}}",
           "type": "linux-bridge",
-          "state": "up",
+          "state": "{{state}}",
           "bridge": {
             "options": {
               "stp": {

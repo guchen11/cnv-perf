@@ -36,7 +36,7 @@
         }
       }
     ],
-    "running": false,
+    "running": true,
     "template": {
       "metadata": {
         "labels": {
@@ -60,7 +60,7 @@
           },
           "resources": {
             "requests": {
-              "memory": "64M",
+              "memory": "96M",
               "cpu": "100m"
             }
           }

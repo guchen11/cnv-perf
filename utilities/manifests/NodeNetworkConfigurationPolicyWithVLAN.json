@@ -10,7 +10,7 @@
        {
          "name": "br-scale-{{index}}",
          "type": "linux-bridge",
-         "state": "up",
+         "state": "{{state}}",
          "bridge": {
            "options": {
              "stp": {
@@ -32,7 +32,7 @@
        {
          "name": "{{base_interface}}.{{index}}",
          "type": "vlan",
-         "state": "up",
+         "state": "{{state}}",
          "vlan": {
            "base-iface": "{{base_interface}}",
            "id": "{{index}}"

@@ -66,7 +66,7 @@ def oc_clone_vm(prefix, namespace, start, end, sleep):
 command_help = """
                 Clone range of DV fom a singe DV.
                 Example: poetry run python main.py openshift-oc-module oc-clone-pvc --start 2 --end 2 --source
-                win10-1 --prefix win10 --namespace default --sleep 0
+                win10-1 --prefix win10 --namespace default --sleep 0 --size 70Gi
                 """
 
 
@@ -77,7 +77,8 @@ command_help = """
 @click.option('--start', type=int, help=click.style('Start index for PVC clone', fg='magenta'))
 @click.option('--end', type=int, help=click.style('End index for PVC clone', fg='magenta'))
 @click.option('--sleep', type=int, help=click.style('sleep between clones', fg='magenta'))
-def oc_clone_pvc(prefix, source, namespace, start, end, sleep):
+@click.option('--size', help=click.style('size of the disk clone', fg='magenta'))
+def oc_clone_pvc(prefix, source, namespace, start, end, sleep, size):
     template = files_access.load_template("utilities/manifests/clone-pvc.json")
     for i in range(start, end + 1):
         PVC_NAME = f'{prefix}-{i}'
@@ -92,6 +93,10 @@ def oc_clone_pvc(prefix, source, namespace, start, end, sleep):
 
         template_str = json.dumps(modified_template)
         modified_template = template_str.replace("{{namespace}}", namespace)
+        modified_template = json.loads(modified_template)
+
+        template_str = json.dumps(modified_template)
+        modified_template = template_str.replace("{{size}}", size)
         modified_template = json.loads(modified_template)
 
         command = f"echo '{json.dumps(modified_template)}' | oc create -n {namespace} -f -"
@@ -339,19 +344,31 @@ command_help: str = """
 @click.option('--sleep', type=int, help=click.style('sleep between NNCPs attach', fg='magenta'))
 @click.option('--vlan', type=bool, default=False, help=click.style('True if added vlan connected to node'))
 @click.option('--base_interface', help=click.style('base interface for NNCPs VLAN', fg='magenta'))
+
 def create_delete_nncp(op, start, end, sleep, vlan, base_interface):
     for i in range(start, end + 1):
         if vlan:
             template = files_access.load_template("utilities/manifests/NodeNetworkConfigurationPolicyWithVLAN.json")
             template_str = json.dumps(template)
             modified_template = template_str.replace("{{index}}", f'{i}')
-            modified_template = modified_template.replace("{{base_interface}}", f'{base_interface}')
+            modified_template = json.loads(modified_template)
+            template_str = json.dumps(modified_template)
+            modified_template = template_str.replace("{{base_interface}}", f'{base_interface}')
+            modified_template = json.loads(modified_template)
         else:
             template = files_access.load_template("utilities/manifests/NodeNetworkConfigurationPolicy.json")
             template_str = json.dumps(template)
             modified_template = template_str.replace("{{index}}", f'{i}')
-
-        command = f"echo '{modified_template}' | oc '{op}' -f -"
+            modified_template = json.loads(modified_template)
+        if op == 'create':
+            template_str = json.dumps(modified_template)
+            modified_template = template_str.replace("{{state}}", 'up')
+            modified_template = json.loads(modified_template)
+        else:
+            template_str = json.dumps(modified_template)
+            modified_template = template_str.replace("{{state}}", 'absent')
+            modified_template = json.loads(modified_template)
+        command = f"echo '{json.dumps(modified_template)}' | oc apply -f -"
         execute_local_linux_command_base(command)
         time.sleep(sleep)
     SuccessfullyConfigured = 0

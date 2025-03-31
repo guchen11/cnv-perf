@@ -7,6 +7,8 @@ from openshift.dynamic import DynamicClient
 from utilities import files_access
 import time
 
+from utilities.bash import execute_local_linux_command_base
+
 
 @click.group()
 def openshift_api_module():
@@ -71,6 +73,8 @@ def create_vm_cirros(prefix, namespace, start, end, sleep):
         v1_services.create(body=modified_template, namespace=namespace)
         print(f"VM {VM_NAME} was created")
         time.sleep(sleep)
+        command = f"oc wait --for=condition=Ready VirtualMachine/{VM_NAME}"
+        execute_local_linux_command_base(command)
 
 
 command_help = """
