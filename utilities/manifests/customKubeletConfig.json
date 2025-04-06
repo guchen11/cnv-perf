@@ -1,0 +1,19 @@
+{
+  "apiVersion": "machineconfiguration.openshift.io/v1",
+  "kind": "KubeletConfig",
+  "metadata": {
+    "name": "custom-kubelet-config"
+  },
+  "spec": {
+    "machineConfigPoolSelector": {
+      "matchLabels": {
+        "custom-kubelet-config": "enabled"
+      }
+    },
+    "autoSizingReserved": true,
+    "kubeletConfig": {
+      "nodeStatusMaxImages": -1,
+      "maxPods": 1000
+    }
+  }
+}
