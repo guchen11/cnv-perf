@@ -464,3 +464,29 @@ def patch_ssh_publickey_vm(namespace, prefix, start, end, sleep):
         command = f"oc patch vm '{prefix}{i}' -n {namespace} --type merge -p='{template_str}'"
         execute_local_linux_command_base(command)
         time.sleep(sleep)
+
+
+command_help: str = """
+    create custom_kubelet_config with the following params.
+
+    autoSizingReserved: true
+    kubeletConfig:
+    nodeStatusMaxImages: -1
+    maxPods: 1000 
+    """
+
+
+@openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+
+def custom_kubelet_config():
+
+    command = f"oc label mcp master custom-kubelet-config=enabled"
+    execute_local_linux_command_base(command)
+    time.sleep(1)
+    command = f"oc label mcp worker custom-kubelet-config=enabled"
+    execute_local_linux_command_base(command)
+    time.sleep(1)
+    template = files_access.load_template("utilities/manifests/customKubeletConfig.json")
+    template_str = json.dumps(template)
+    command = f"echo '{template_str}' | oc create -f -"
+    execute_local_linux_command_base(command)
