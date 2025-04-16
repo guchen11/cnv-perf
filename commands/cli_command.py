@@ -2,9 +2,10 @@ import click
 import paramiko
 from utilities.bash import execute_local_linux_command_base
 from utilities import bash
+import utilities.oc
+import commands.openshift_oc
 
 CONTEXT_SETTINGS = dict(max_content_width=120)
-
 
 @click.group()
 def cli_command_module():
@@ -103,4 +104,36 @@ command_help: str = """
 @cli_command_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
 @click.argument('test_name', type=click.STRING, required=True)
 def deploy_test_at_grafana(test_name):
+    bash.deploy_test_at_grafana(test_name)
+
+command_help: str = """
+    Performance test constructor load run
+
+    Args:
+        null.
+
+    Examples:
+        test_constructor
+    """
+
+
+@cli_command_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+def test_constructor():
+    utilities.oc.empty_prometheus()
+
+
+command_help: str = """
+    Performance test destructor
+
+    Examples:
+        test-destructor "scale_up_test_1"
+    """
+
+
+@cli_command_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
+@click.argument('test_name', type=click.STRING, required=True)
+def test_destructor(test_name):
+    execute_local_linux_command_base("echo ggg")
+    utilities.oc.dump_prometheus(test_name)
+    bash.scp_promdb_to_grafana(test_name)
     bash.deploy_test_at_grafana(test_name)
