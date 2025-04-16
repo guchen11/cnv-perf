@@ -14,12 +14,10 @@ def empty_prometheus():
     while count < 2:
         command = f"oc delete po prometheus-k8s-{count} -n openshift-monitoring"
         execute_local_linux_command_base(command)
-        time.sleep(2)
-        command = f"oc exec -n openshift-monitoring prometheus-k8s-{count} -- du -sh /prometheus"
-        execute_local_linux_command_base(command)
-        time.sleep(2)
+        time.sleep(10)
         count += 1
-
+    command = f"oc exec -n openshift-monitoring prometheus-k8s-0 -- du -sh /prometheus"
+    execute_local_linux_command_base(command)
 
 def dump_prometheus(test_name):
     command = f"mkdir -p {test_name}"

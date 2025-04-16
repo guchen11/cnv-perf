@@ -47,5 +47,5 @@ def deploy_test_at_grafana(test_name):
 
 
 def scp_promdb_to_grafana(test_name):
-    command = f"sshpass -p 100yard- scp {test_name}.tar.gz fedora@default.fedora-grafana-scale.scale-test.vm.cnv2.engineering.redhat.com:/home/fedora"
+    command = f"sshpass -p 100yard- scp {test_name}.tar.gz fedora@default.fedora-grafana-scale.scale-test.vm.cnv2.engineering.redhat.com:/home/fedora/backup_tests/"
     execute_local_linux_command_base(command)
