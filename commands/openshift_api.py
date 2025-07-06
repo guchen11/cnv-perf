@@ -46,7 +46,8 @@ def create_namespace(start, end):
 command_help: str = """
     Create VMs with start and end index.
     
-    Example: create-vm-cirros --prefix cirros-vm- --namespace default --start 1 --end 5 --sleep 2 
+    Example: create-vm-cirros --prefix cirros-vm- --volume_mode Block --storage_class_name ocs-storagecluster-ceph-rbd-virtualization 
+    --namespace default --start 1 --end 5 --sleep 2 
     This will create VMs from 'cirros-vm-1' to 'cirros-vm-5' in the 'default' namespace with 2 secounds sleep.
     """
 
@@ -54,10 +55,12 @@ command_help: str = """
 @openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
 @click.option('--prefix', help=click.style('Prefix for VM names', fg='magenta'))
 @click.option('--namespace', help=click.style('Namespace for VM creation', fg='magenta'))
+@click.option('--volume_mode', help=click.style('volumeMode for VM PVC, Filesystem or Block', fg='magenta'))
+@click.option('--storage_class_name', help=click.style('storageClassName for VM PVC, iscsi-lun or ocs-storagecluster-ceph-rbd-virtualization', fg='magenta'))
 @click.option('--start', type=int, help=click.style('Start index for VM creation', fg='magenta'))
 @click.option('--end', type=int, help=click.style('End index for VM creation', fg='magenta'))
 @click.option('--sleep', type=int, help=click.style('sleep between VMSs', fg='magenta'))
-def create_vm_cirros(prefix, namespace, start, end, sleep):
+def create_vm_cirros(prefix, namespace, volume_mode, storage_class_name, start, end, sleep):
     k8s_client = config.new_client_from_config()
     dyn_client = DynamicClient(k8s_client)
     v1_services = dyn_client.resources.get(api_version='kubevirt.io/v1', kind='VirtualMachine')
@@ -70,6 +73,14 @@ def create_vm_cirros(prefix, namespace, start, end, sleep):
         modified_template = template_str.replace("{{VM_NAME}}", VM_NAME)
         modified_template = json.loads(modified_template)
 
+        template_str = json.dumps(template)
+        modified_template = template_str.replace("{{VOLUME_MODE}}", volume_mode)
+        modified_template = json.loads(modified_template)
+
+        template_str = json.dumps(template)
+        modified_template = template_str.replace("{{STORAGE_CLASS_NAME}}", storage_class_name)
+        modified_template = json.loads(modified_template)
+        
         v1_services.create(body=modified_template, namespace=namespace)
         print(f"VM {VM_NAME} was created")
         time.sleep(sleep)

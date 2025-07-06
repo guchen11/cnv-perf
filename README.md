@@ -46,7 +46,7 @@ Summary of commands :
 
 Copy and run from any system :
 Example:
-rsync -a -Pav -e "ssh -l kni" /home/guchen/cnv-perf {jump host}:/home/kni/
+rsync -a -Pav -e "ssh -l kni" --exclude 'cnv-perf/.venv/' /home/guchen/cnv-perf {jump host}:/home/kni/
 
 At jump host :
 
