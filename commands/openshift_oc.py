@@ -31,17 +31,18 @@ CONTEXT_SETTINGS = dict(max_content_width=120)
 command_help = """
                 Clone range of DV fom a singe DV.
                 Example: poetry run python main.py openshift-oc-module oc-clone-vm --start 2 --end 2 --prefix win10 
-                --namespace default --sleep 0
+                --namespace default --volume_mode Block --sleep 0
                 """
 
 
 @openshift_oc_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
 @click.option('--prefix', help=click.style('Prefix for PVC clone', fg='magenta'))
 @click.option('--namespace', help=click.style('Namespace for PVC clone', fg='magenta'))
+@click.option('--volume_mode', help=click.style('volumeMode for PVC clone, Filesystem or Block', fg='magenta'))
 @click.option('--start', type=int, help=click.style('Start index for PVC clone', fg='magenta'))
 @click.option('--end', type=int, help=click.style('End index for PVC clone', fg='magenta'))
 @click.option('--sleep', type=int, help=click.style('sleep between clones', fg='magenta'))
-def oc_clone_vm(prefix, namespace, start, end, sleep):
+def oc_clone_vm(prefix, namespace, volume_mode, start, end, sleep):
     template = files_access.load_template("utilities/manifests/clone-vm.json")
     for i in range(start, end + 1):
         VM_NAME = f'{prefix}-{i}'
@@ -54,6 +55,10 @@ def oc_clone_vm(prefix, namespace, start, end, sleep):
         modified_template = template_str.replace("{{NAMESPACE}}", namespace)
         modified_template = json.loads(modified_template)
 
+        template_str = json.dumps(modified_template)
+        modified_template = template_str.replace("{{VOLUME_MODE}}", volume_mode)
+        modified_template = json.loads(modified_template)
+
         command = f"echo '{json.dumps(modified_template)}' | oc create -f -"
         execute_local_linux_command_base(command)
 
@@ -64,7 +69,7 @@ def oc_clone_vm(prefix, namespace, start, end, sleep):
 
 
 command_help = """
-                Clone range of DV fom a singe DV.
+                Clone range of DV from a singe DV.
                 Example: poetry run python main.py openshift-oc-module oc-clone-pvc --start 2 --end 2 --source
                 win10-1 --prefix win10 --namespace default --sleep 0 --size 70Gi
                 """

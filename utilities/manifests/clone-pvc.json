@@ -20,7 +20,7 @@
           "storage": "{{size}}"
         }
       },
-      "volumeMode": "Block"
+      "volumeMode": "{{VOLUME_MODE}}"
     }
   }
 }

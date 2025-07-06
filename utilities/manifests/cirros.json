@@ -25,8 +25,8 @@
                 "storage": "100M"
               }
             },
-            "storageClassName": "ocs-storagecluster-ceph-rbd-virtualization",
-            "volumeMode": "Block"
+            "storageClassName": "{{STORAGE_CLASS_NAME}}",
+            "volumeMode": "{{VOLUME_MODE}}"
           },
           "source": {
             "http": {
