@@ -140,17 +140,20 @@ def delete_vm(prefix, namespace, start, end):
 command_help: str = """
     Create pvc with start and end index.
 
-    Example: create_pvc --prefix pvc-test- --namespace default --start 1 --end 2 --sleep 2 
+    Example: create_pvc --prefix pvc-test- --namespace default --volume_mode Block --storage_class_name ocs-storagecluster-ceph-rbd-virtualization --start 1 --end 2 --sleep 2 
+    Example: create-pvc --prefix fusion-pvc-test- --namespace fusion-vms  --volume_mode Filesystem --storage_class_name iscsi-lun --start 1 --end 2 --sleep 0
     This will create pvc from 'pvc-test-1' to 'pvc-test-2'.
     """
 
 @openshift_api_module.command(context_settings=CONTEXT_SETTINGS, help=click.style(command_help, fg='yellow'))
 @click.option('--prefix', help=click.style('Prefix for PVC names', fg='magenta'))
 @click.option('--namespace', help=click.style('Namespace for PVC creation', fg='magenta'))
+@click.option('--volume_mode', help=click.style('volumeMode for PVC, Filesystem or Block', fg='magenta'))
+@click.option('--storage_class_name', help=click.style('storageClassName for PVC, iscsi-lun or ocs-storagecluster-ceph-rbd-virtualization', fg='magenta'))
 @click.option('--start', type=int, help=click.style('Start index for PVC creation', fg='magenta'))
 @click.option('--end', type=int, help=click.style('End index for PVC creation', fg='magenta'))
 @click.option('--sleep', type=int, help=click.style('sleep between PVCs', fg='magenta'))
-def create_pvc(prefix, namespace, start, end, sleep):
+def create_pvc(prefix, namespace, volume_mode, storage_class_name, start, end, sleep):
     # Load OpenShift configuration from default kubeconfig file
     config.load_kube_config()
 
@@ -163,7 +166,7 @@ def create_pvc(prefix, namespace, start, end, sleep):
     for i in range(start, end + 1):
         pvc_name = f'{prefix}{i}'
     # Set namespace, VM name, PVC details
-        storage_class_name = "ocs-storagecluster-ceph-rbd-virtualization"
+        storage_class_name = storage_class_name
         access_modes = "ReadWriteMany"
         storage_size = "1Gi"
 
@@ -178,7 +181,7 @@ def create_pvc(prefix, namespace, start, end, sleep):
                     requests={"storage": storage_size}
                 ),
                 storage_class_name=storage_class_name,
-                volume_mode="Block"  # Specify the volume mode as "Block"
+                volume_mode=volume_mode  # Specify the volume mode as "Block"
             )
         )
 
