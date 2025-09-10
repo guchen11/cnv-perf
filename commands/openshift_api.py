@@ -71,16 +71,11 @@ def create_vm_cirros(prefix, namespace, volume_mode, storage_class_name, start, 
         VM_NAME = f'{prefix}{i}'
         template_str = json.dumps(template)
         modified_template = template_str.replace("{{VM_NAME}}", VM_NAME)
+        modified_template = modified_template.replace("{{VOLUME_MODE}}", volume_mode)
+        modified_template = modified_template.replace("{{STORAGE_CLASS_NAME}}", storage_class_name)
+
         modified_template = json.loads(modified_template)
 
-        template_str = json.dumps(template)
-        modified_template = template_str.replace("{{VOLUME_MODE}}", volume_mode)
-        modified_template = json.loads(modified_template)
-
-        template_str = json.dumps(template)
-        modified_template = template_str.replace("{{STORAGE_CLASS_NAME}}", storage_class_name)
-        modified_template = json.loads(modified_template)
-        
         v1_services.create(body=modified_template, namespace=namespace)
         print(f"VM {VM_NAME} was created")
         time.sleep(sleep)
